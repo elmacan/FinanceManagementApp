@@ -13,8 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class AuthService {
 
@@ -26,6 +24,12 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder encoder;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
 
     public ResponseEntity<String> register(RegisterRequest dto) {
@@ -53,11 +57,11 @@ public class AuthService {
                     dto.getEmail(),
                     dto.getPassword()));
 
-            Optional<Users> user=userRepo.findByEmail(dto.getEmail());
+            Users user=userRepo.findByEmail(dto.getEmail()) .orElseThrow(() -> new RuntimeException("User not found"));;
 
-            String accessToken = "";
+            String accessToken = jwtService.generateToken(user);
 
-            String refreshToken = "";
+            String refreshToken =refreshTokenService.generateRefreshToken(user);
 
 
             return new ResponseEntity<>(new AuthResponse(accessToken,refreshToken),HttpStatus.OK);
