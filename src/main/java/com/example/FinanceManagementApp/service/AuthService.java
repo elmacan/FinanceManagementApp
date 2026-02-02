@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -23,6 +24,9 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authManager;
 
+    @Autowired
+    private PasswordEncoder encoder;
+
 
     public ResponseEntity<String> register(RegisterRequest dto) {
 
@@ -32,7 +36,7 @@ public class AuthService {
 
         Users user=new Users();
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        user.setPassword(encoder.encode(dto.getPassword()));
         user.setUserName(dto.getUserName());
         user.setBaseCurrency(dto.getBaseCurrency());
 
