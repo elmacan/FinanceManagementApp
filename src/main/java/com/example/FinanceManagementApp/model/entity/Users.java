@@ -3,6 +3,8 @@ package com.example.FinanceManagementApp.model.entity;
 import com.example.FinanceManagementApp.model.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.math.BigDecimal;
 
@@ -14,7 +16,7 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String userName;
     @Column(unique=true)
     private String email;
     private String password;
@@ -23,4 +25,10 @@ public class Users {
     private BigDecimal monthlyIncome;   //eğer yoksa
 
     private CurrencyType baseCurrency;
+
+
+
+
+
+
 }
