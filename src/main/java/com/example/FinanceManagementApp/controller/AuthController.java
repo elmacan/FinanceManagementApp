@@ -7,6 +7,7 @@ import com.example.FinanceManagementApp.dto.response.AuthResponse;
 import com.example.FinanceManagementApp.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
@@ -22,35 +23,42 @@ public class AuthController {
 
     //global handling , http statusler düzenlencek
 
-
     @Autowired
     AuthService authService;
 
     @PostMapping("register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest dto){
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequest dto){
 
-        return authService.register(dto);
+        authService.register(dto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED) //  201
+                .build();
     }
 
 
     @PostMapping("login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest dto){
 
-        return authService.verify(dto);
+        AuthResponse response=authService.verify(dto);
+        return ResponseEntity.ok(response);  //200
     }
 
 
     @PostMapping("refresh")
     public ResponseEntity<AuthResponse> refresh(@RequestBody @Valid RefreshTokenRequest dto){
 
-        return authService.refresh(dto);
+        AuthResponse response = authService.refresh(dto);
+
+        return ResponseEntity.ok(response); //200
     }
 
 
     @PostMapping("logout")
     public ResponseEntity<Void> logout() {
 
-        String email = SecurityContextHolder.getContext()
+        String email = SecurityContextHolder
+                .getContext()
                 .getAuthentication()
                 .getName();
 

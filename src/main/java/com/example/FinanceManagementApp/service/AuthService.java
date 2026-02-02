@@ -8,7 +8,6 @@ import com.example.FinanceManagementApp.model.entity.RefreshToken;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.repository.RefreshTokenRepo;
 import com.example.FinanceManagementApp.repository.UsersRepo;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +53,7 @@ public class AuthService {
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
 
-    public ResponseEntity<AuthResponse> verify(LoginRequest dto) {
+    public AuthResponse verify(LoginRequest dto) {
 
 
         try {
@@ -70,7 +69,7 @@ public class AuthService {
             String refreshToken =refreshTokenService.generateRefreshToken(user).getToken();
 
 
-            return new ResponseEntity<>(new AuthResponse(accessToken,refreshToken),HttpStatus.OK);
+            return new AuthResponse(accessToken,refreshToken);
 
 
         } catch (Exception e) {
@@ -81,7 +80,7 @@ public class AuthService {
 
     }
 
-    public ResponseEntity<AuthResponse> refresh(RefreshTokenRequest dto) {
+    public AuthResponse refresh(RefreshTokenRequest dto) {
         RefreshToken refreshToken=refreshTokenRepo
                 .findByToken(dto.getRefreshToken())
                 .orElseThrow(() ->
@@ -92,13 +91,13 @@ public class AuthService {
 
         Users user=refreshToken.getUser();
 
-        //rotation
+        //rotation (kullanılan token)
         refreshTokenRepo.delete(refreshToken);
 
         String newAccessToken=jwtService.generateAccessToken(user);
         String newRefreshToken = refreshTokenService.generateRefreshToken(user).getToken();
 
-        return new ResponseEntity<>(new AuthResponse(newAccessToken,newRefreshToken),HttpStatus.OK);
+        return new AuthResponse(newAccessToken, newRefreshToken);
     }
 
     public void logout(String email) {
@@ -106,6 +105,7 @@ public class AuthService {
 
 
             System.out.println("User ID: " + user.getId());
+            //userın tüm refresh tokenleri
             refreshTokenRepo.deleteByUser(user);
 
 
