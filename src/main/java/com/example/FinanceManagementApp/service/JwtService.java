@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -23,7 +22,7 @@ public class JwtService {
 
     //setSubject() = Token’ın kime ait olduğunu tanımlayan ana kimlik alanıdır (principal)   subject=mail
 
-    public String generateToken(Users user) {
+    public String generateAccessToken(Users user) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))

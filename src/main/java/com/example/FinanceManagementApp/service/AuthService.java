@@ -1,10 +1,14 @@
 package com.example.FinanceManagementApp.service;
 
 import com.example.FinanceManagementApp.dto.request.LoginRequest;
+import com.example.FinanceManagementApp.dto.request.RefreshTokenRequest;
 import com.example.FinanceManagementApp.dto.request.RegisterRequest;
 import com.example.FinanceManagementApp.dto.response.AuthResponse;
+import com.example.FinanceManagementApp.model.entity.RefreshToken;
 import com.example.FinanceManagementApp.model.entity.Users;
+import com.example.FinanceManagementApp.repository.RefreshTokenRepo;
 import com.example.FinanceManagementApp.repository.UsersRepo;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +34,8 @@ public class AuthService {
 
     @Autowired
     private RefreshTokenService refreshTokenService;
+    @Autowired
+    private RefreshTokenRepo refreshTokenRepo;
 
 
     public ResponseEntity<String> register(RegisterRequest dto) {
@@ -57,11 +63,11 @@ public class AuthService {
                     dto.getEmail(),
                     dto.getPassword()));
 
-            Users user=userRepo.findByEmail(dto.getEmail()) .orElseThrow(() -> new RuntimeException("User not found"));;
+            Users user=userRepo.findByEmail(dto.getEmail()) .orElseThrow(() -> new RuntimeException("User not found"));
 
-            String accessToken = jwtService.generateToken(user);
+            String accessToken = jwtService.generateAccessToken(user);
 
-            String refreshToken =refreshTokenService.generateRefreshToken(user);
+            String refreshToken =refreshTokenService.generateRefreshToken(user).getToken();
 
 
             return new ResponseEntity<>(new AuthResponse(accessToken,refreshToken),HttpStatus.OK);
@@ -71,6 +77,36 @@ public class AuthService {
 
             throw new RuntimeException("Login failed");
         }
+
+
+    }
+
+    public ResponseEntity<AuthResponse> refresh(RefreshTokenRequest dto) {
+        RefreshToken refreshToken=refreshTokenRepo
+                .findByToken(dto.getRefreshToken())
+                .orElseThrow(() ->
+                        new RuntimeException("Refresh token not found")
+                );
+
+        refreshTokenService.verifyExpiration(refreshToken);
+
+        Users user=refreshToken.getUser();
+
+        //rotation
+        refreshTokenRepo.delete(refreshToken);
+
+        String newAccessToken=jwtService.generateAccessToken(user);
+        String newRefreshToken = refreshTokenService.generateRefreshToken(user).getToken();
+
+        return new ResponseEntity<>(new AuthResponse(newAccessToken,newRefreshToken),HttpStatus.OK);
+    }
+
+    public void logout(String email) {
+        Users user=userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+
+
+            System.out.println("User ID: " + user.getId());
+            refreshTokenRepo.deleteByUser(user);
 
 
     }
