@@ -19,7 +19,7 @@ public class JwtService {
     // ENV veya application.properties'den gelmeli (şimdilik sabit)
     private final String secretKey = "financeApplicationSecretKey123456789012345";
 
-    private final long accessTokenExpiration = 1000 * 60 * 5; //5dk
+    private final long accessTokenExpiration = 1000 * 60 * 15; //15dk
 
     //setSubject() = Token’ın kime ait olduğunu tanımlayan ana kimlik alanıdır (principal)   subject=mail
 

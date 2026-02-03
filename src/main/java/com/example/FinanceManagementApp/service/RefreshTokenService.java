@@ -1,10 +1,11 @@
 package com.example.FinanceManagementApp.service;
 
 
+import com.example.FinanceManagementApp.exception.ApiException;
 import com.example.FinanceManagementApp.model.entity.RefreshToken;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.repository.RefreshTokenRepo;
-import com.example.FinanceManagementApp.repository.UsersRepo;
+import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +38,8 @@ public class RefreshTokenService {
 
         if (token.getExpiryDate().isBefore(Instant.now())) {
 
-            refreshTokenRepo.delete(token);  //o anki refresh token siliniyor süresi geçince
-            throw new RuntimeException("Refresh token expired");
+            refreshTokenRepo.delete(token);  //o anki refresh token siliniyor süresi gecince
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "Refresh token expired");
         }
 
     }

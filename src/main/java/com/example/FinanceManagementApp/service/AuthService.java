@@ -4,6 +4,7 @@ import com.example.FinanceManagementApp.dto.request.LoginRequest;
 import com.example.FinanceManagementApp.dto.request.RefreshTokenRequest;
 import com.example.FinanceManagementApp.dto.request.RegisterRequest;
 import com.example.FinanceManagementApp.dto.response.AuthResponse;
+import com.example.FinanceManagementApp.exception.ApiException;
 import com.example.FinanceManagementApp.model.entity.RefreshToken;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.repository.RefreshTokenRepo;
@@ -42,7 +43,7 @@ public class AuthService {
     public ResponseEntity<String> register(RegisterRequest dto) {
 
         if(userRepo.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new ApiException(HttpStatus.CONFLICT, "Email already exists");
         }
 
         Users user=new Users();
@@ -61,7 +62,8 @@ public class AuthService {
                     dto.getEmail(),
                     dto.getPassword()));
 
-            Users user=userRepo.findByEmail(dto.getEmail()) .orElseThrow(() -> new RuntimeException("User not found"));
+            Users user=userRepo.findByEmail(dto.getEmail())
+                    .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
 
             String accessToken = jwtService.generateAccessToken(user);
 
@@ -75,9 +77,7 @@ public class AuthService {
     public AuthResponse refresh(RefreshTokenRequest dto) {
         RefreshToken refreshToken=refreshTokenRepo
                 .findByToken(dto.getRefreshToken())
-                .orElseThrow(() ->
-                        new RuntimeException("Refresh token not found")
-                );
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Refresh token not found"));
 
         refreshTokenService.verifyExpiration(refreshToken);
 
