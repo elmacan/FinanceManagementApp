@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 @Service
@@ -23,7 +25,11 @@ public class JwtService {
     //setSubject() = Token’ın kime ait olduğunu tanımlayan ana kimlik alanıdır (principal)   subject=mail
 
     public String generateAccessToken(Users user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getId());
+
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
@@ -35,6 +41,12 @@ public class JwtService {
 
     private Key getKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public Long extractUserId(String token) {
+
+        Claims claims = extractAllClaims(token);
+        return claims.get("userId", Long.class);
     }
 
 
@@ -57,10 +69,20 @@ public class JwtService {
                 .getBody();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    /*public boolean isTokenValid(String token, UserDetails userDetails) {
         final String email = extractEmail(token);
         return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }*/
+    public boolean isTokenValid(String token) {
+
+        try {
+            extractAllClaims(token); // signature + structure validate eder
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
+
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());

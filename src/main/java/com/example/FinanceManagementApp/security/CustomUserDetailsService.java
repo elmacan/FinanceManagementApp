@@ -33,6 +33,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 new ArrayList<>()
         );
     }
-
-
 }
+
+//“Kullanıcıyı nereden ve nasıl bulacağını” söyleyen servistir.
+//to verify email and password
+//login request-> auth manager -> auth provider -> userdetailsService -> UserRepo -> DB
+
+//Spring Security’nin LOGIN sırasında kullandığı servistir.

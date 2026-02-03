@@ -56,9 +56,6 @@ public class AuthService {
 
     public AuthResponse verify(LoginRequest dto) {
 
-
-        try {
-
             authManager.authenticate(new UsernamePasswordAuthenticationToken(
                     dto.getEmail(),
                     dto.getPassword()));
@@ -71,13 +68,6 @@ public class AuthService {
 
 
             return new AuthResponse(accessToken,refreshToken);
-
-
-        } catch (Exception e) {
-
-            throw new RuntimeException("Login failed");
-        }
-
 
     }
 
@@ -102,13 +92,11 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String email) {
-        Users user=userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+    public void logout(Long userId) {
 
-
-            System.out.println("User ID: " + user.getId()+ " logged out");
+        System.out.println("User ID: " + userId+ " logged out");
             //userın tüm refresh tokenleri
-            refreshTokenRepo.deleteByUser(user);
+            refreshTokenRepo.deleteByUser_Id(userId);
 
 
     }
