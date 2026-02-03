@@ -38,12 +38,19 @@ public class SecurityConfig {
         return http.csrf(customizer -> customizer.disable()).
                 authorizeHttpRequests(request -> request
                         .requestMatchers(
-                                "/auth/login",
-                                "/auth/register",
-                                "/auth/refresh").permitAll()
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/refresh").permitAll()
+                        // SWAGGER endpointleri
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
-                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -1,10 +1,9 @@
-package com.example.FinanceManagementApp.service;
+package com.example.FinanceManagementApp.security;
 
 import com.example.FinanceManagementApp.model.entity.Users;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -69,10 +68,7 @@ public class JwtService {
                 .getBody();
     }
 
-    /*public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String email = extractEmail(token);
-        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }*/
+
     public boolean isTokenValid(String token) {
 
         try {
