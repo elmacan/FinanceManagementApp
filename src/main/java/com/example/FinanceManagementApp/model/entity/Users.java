@@ -24,6 +24,7 @@ public class Users {
     @Column(precision=19, scale=4)
     private BigDecimal monthlyIncome;   //eğer yoksa
 
+    @Enumerated(EnumType.STRING)
     private CurrencyType baseCurrency;
 
 

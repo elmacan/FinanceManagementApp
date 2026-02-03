@@ -8,6 +8,7 @@ import com.example.FinanceManagementApp.model.entity.RefreshToken;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.repository.RefreshTokenRepo;
 import com.example.FinanceManagementApp.repository.UsersRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -100,11 +101,12 @@ public class AuthService {
         return new AuthResponse(newAccessToken, newRefreshToken);
     }
 
+    @Transactional
     public void logout(String email) {
         Users user=userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
 
-            System.out.println("User ID: " + user.getId());
+            System.out.println("User ID: " + user.getId()+ " logged out");
             //userın tüm refresh tokenleri
             refreshTokenRepo.deleteByUser(user);
 
