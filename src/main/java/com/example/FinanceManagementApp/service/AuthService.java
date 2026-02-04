@@ -40,7 +40,7 @@ public class AuthService {
     private RefreshTokenRepo refreshTokenRepo;
 
 
-    public ResponseEntity<String> register(RegisterRequest dto) {
+    public void register(RegisterRequest dto) {
 
         if(userRepo.existsByEmail(dto.getEmail())) {
             throw new ApiException(HttpStatus.CONFLICT, "Email already exists");
@@ -53,7 +53,7 @@ public class AuthService {
         user.setBaseCurrency(dto.getBaseCurrency());
 
         userRepo.save(user);
-        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
+
     }
 
     public AuthResponse verify(LoginRequest dto) {

@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 @Entity
 public class Users {
 
+    //buradaki validation kullanılmıyor , controller ile @Valid yapılmadığı sürece
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +24,7 @@ public class Users {
     private String password;
 
     @Column(precision=19, scale=4)
-    private BigDecimal monthlyIncome;   //eğer yoksa
+    private BigDecimal monthlyIncome =BigDecimal.ZERO;;   //default=0
 
     @Enumerated(EnumType.STRING)
     private CurrencyType baseCurrency;

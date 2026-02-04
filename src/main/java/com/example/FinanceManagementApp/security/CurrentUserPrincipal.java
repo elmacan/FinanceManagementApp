@@ -5,6 +5,8 @@ package com.example.FinanceManagementApp.security;
 
 import lombok.Getter;
 
+
+//auth dan gelen
 @Getter
 public class CurrentUserPrincipal {
     private final Long id;

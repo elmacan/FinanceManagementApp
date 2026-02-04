@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
-
-
-    //global handling , http statusler düzenlencek
+    //http statusler controller içinde olmalı
 
     @Autowired
     AuthService authService;
