@@ -1,5 +1,6 @@
 package com.example.FinanceManagementApp.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,6 +54,22 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex->ex
+                        //token yok,auth yok 
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+
+                            response.getWriter().write("""
+                        {
+                          "status": 401,
+                          "error": "Unauthorized",
+                          "message": "Authentication required",
+                          "path": "%s"
+                        }
+                        """.formatted(request.getRequestURI()));
+                        })
+
+                        //token var ,yetki yok
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .authenticationProvider(authenticationProvider())
