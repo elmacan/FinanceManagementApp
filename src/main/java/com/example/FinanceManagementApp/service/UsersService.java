@@ -53,4 +53,6 @@ public class UsersService {
     private BigDecimal normalize(BigDecimal value) {
         return value.setScale(4, RoundingMode.HALF_UP);
     }
+
+    //user 2k girmek isterse 2.000 değil 2000 girmeli
 }

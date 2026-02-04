@@ -30,6 +30,8 @@ public class JwtFilter extends OncePerRequestFilter {
         String email=null;
         Long userId=null;
 
+    try {
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
             token = authHeader.substring(7);
@@ -51,6 +53,20 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }catch (Exception e){
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+
+        response.getWriter().write("""
+            {
+              "status": 401,
+              "error": "Unauthorized",
+              "message": "Token expired or invalid",
+              "path": "%s"
+            }
+            """.formatted(request.getRequestURI()));
+
+    }
     }
 
 

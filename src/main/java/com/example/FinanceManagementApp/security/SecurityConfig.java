@@ -26,6 +26,9 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Autowired
+    CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
@@ -48,8 +51,10 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
-
                         .anyRequest().authenticated())
+                .exceptionHandling(ex->ex
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
                 .authenticationProvider(authenticationProvider())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

@@ -28,7 +28,7 @@ public class UsersController {
         return  ResponseEntity.ok(response);
     }
 
-    @PostMapping("me")
+    @PutMapping("me")
     public ResponseEntity<Void> updateUserProfile(@AuthenticationPrincipal CurrentUserPrincipal principal,@RequestBody @Valid UpdateUserRequest dto) {
 
         usersService.updateUserProfile(principal,dto);

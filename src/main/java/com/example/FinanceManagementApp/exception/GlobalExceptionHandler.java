@@ -1,5 +1,6 @@
 package com.example.FinanceManagementApp.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -44,7 +46,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "Malformed request body", request, null);
+
+        String message = "Malformed request body";
+        Map<String, String> details = null;
+
+        Throwable cause = ex.getCause();
+        if (cause instanceof InvalidFormatException ife) {
+
+            // Eğer enum hatasıysa
+            if (ife.getTargetType().isEnum()) {
+
+                Object[] enumValues = ife.getTargetType().getEnumConstants();
+                String allowedValues = Arrays.toString(enumValues);
+
+                message = "Invalid enum value";
+                details = new LinkedHashMap<>();
+
+                String fieldName = ife.getPath().isEmpty()
+                        ? "unknown"
+                        : ife.getPath().get(0).getFieldName();
+
+                details.put(fieldName, "Allowed values: " + allowedValues);
+            }
+        }
+
+        return buildResponse(HttpStatus.BAD_REQUEST, message, request, details);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
