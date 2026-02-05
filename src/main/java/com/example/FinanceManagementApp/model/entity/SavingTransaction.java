@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -31,6 +32,13 @@ public class SavingTransaction {
 
     @ManyToOne
     private SavingGoal goal;
+
+    @Column(nullable = false,updatable = false)
+    private LocalDateTime createdAt;
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
 
 

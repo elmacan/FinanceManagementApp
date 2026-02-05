@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -37,6 +38,13 @@ public class Budget {
     @ManyToOne
     private Category category;  //expenseCategory olcak
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Users user;
+
+    @Column(nullable = false,updatable = false)
+    private LocalDateTime createdAt;
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

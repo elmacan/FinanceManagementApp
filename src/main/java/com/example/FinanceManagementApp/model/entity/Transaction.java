@@ -1,6 +1,7 @@
 package com.example.FinanceManagementApp.model.entity;
 
 import com.example.FinanceManagementApp.model.enums.CurrencyType;
+import com.example.FinanceManagementApp.model.enums.TransactionSourceType;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -35,20 +36,30 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionType type;
 
+    @Enumerated(EnumType.STRING)
+    private TransactionSourceType sourceType;
+
+    private Long sourceId;
+
+
 
     @Column(nullable = false)
-    private LocalDateTime transactionDate;
+    private LocalDateTime transactionDate;  //user input
+
+
+    @Column(nullable = false,updatable = false)
+    private LocalDateTime createdAt;
     @PrePersist
     public void onCreate() {
-        this.transactionDate = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     @ManyToOne
     private Category category;
 
 
-    @ManyToOne
-    private Users users;
+    @ManyToOne(optional=false)
+    private Users user;
 
     private String description;
 

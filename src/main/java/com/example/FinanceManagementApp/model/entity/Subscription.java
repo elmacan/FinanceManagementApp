@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -31,10 +32,18 @@ public class Subscription {
 
     private Integer billingDay; // Örn: her ay 15'i
 
+    @Column(nullable=false)
     private Boolean active;
 
-    @ManyToOne
-    private Users users;
+    @ManyToOne(optional = false)
+    private Users user;
 
     private Boolean autoPay;
+
+    @Column(nullable = false,updatable = false)
+    private LocalDateTime createdAt;
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

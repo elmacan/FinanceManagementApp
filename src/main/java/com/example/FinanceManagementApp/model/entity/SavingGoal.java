@@ -41,7 +41,7 @@ public class SavingGoal {
     @Column(nullable = false)
     private Boolean completed=false;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Users user;
 
     @OneToMany(mappedBy = "goal", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -18,14 +18,17 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable=false)
     private String userName;
-    @Column(unique=true)
+    @Column(nullable = false, unique=true)
     private String email;
+    @Column(nullable=false)
     private String password;
 
     @Column(precision=19, scale=4)
     private BigDecimal monthlyIncome =BigDecimal.ZERO;;   //default=0
 
+    @Column(nullable=false)
     @Enumerated(EnumType.STRING)
     private CurrencyType baseCurrency;
 

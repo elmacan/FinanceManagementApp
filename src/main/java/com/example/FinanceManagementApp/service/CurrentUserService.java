@@ -22,4 +22,8 @@ public class CurrentUserService {
 
 
     }
+
+    public Long getCurrentUserId(CurrentUserPrincipal principal) {
+        return principal.getId();
+    }
 }

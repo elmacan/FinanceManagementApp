@@ -1,6 +1,6 @@
 package com.example.FinanceManagementApp.model.entity;
 
-import com.example.FinanceManagementApp.model.enums.CategoryType;
+import com.example.FinanceManagementApp.model.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,8 +22,9 @@ public class Category {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private CategoryType type;
+    @Column(nullable=false)
+    private TransactionType type;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Users user;
 }
