@@ -4,6 +4,6 @@ public enum CurrencyType {
     TRY,
     USD,
     EUR,
-    GOLD
+    GOLD_GRAM
 }
 

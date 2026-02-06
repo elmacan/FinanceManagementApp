@@ -28,7 +28,9 @@ public class Transaction {
     private BigDecimal rate;
 
     @Column(nullable=false, precision=19, scale=4)
-    private BigDecimal convertedAmount;  //userın base currency sine göre
+    private BigDecimal convertedAmount;  //userın base currency sine göre xxx
+
+    private CurrencyType convertedCurrency;  //= işlem anındaki user.baseCurrency   (user base değiştirir diye)
 
     //base currency ile yapılan işlemlerde rate = 1 ve convertedAmount = originalAmount set edilmeli
 
