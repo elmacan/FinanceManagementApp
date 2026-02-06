@@ -1,9 +1,59 @@
 package com.example.FinanceManagementApp.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.FinanceManagementApp.dto.request.CategoryRequest;
+import com.example.FinanceManagementApp.dto.response.CategoryResponse;
+import com.example.FinanceManagementApp.model.enums.TransactionType;
+import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
+import com.example.FinanceManagementApp.service.CategoryService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("categories")
+@RequestMapping("api/categories")
 public class CategoryController {
+    @Autowired
+    CategoryService categoryService;
+
+
+    //
+    //   /api/categories?type=EXPENSE
+    @GetMapping()
+    public ResponseEntity<List<CategoryResponse>> getCategories(@RequestParam(required = false) TransactionType type, @AuthenticationPrincipal CurrentUserPrincipal principal) {
+
+        return  ResponseEntity.ok(categoryService.getCategories(principal,type));
+
+    }
+
+
+    @PostMapping
+    public ResponseEntity<CategoryResponse> create(@AuthenticationPrincipal CurrentUserPrincipal principal,
+            @RequestBody @Valid CategoryRequest dto) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new CategoryResponse(categoryService.create(dto, principal)));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryResponse> get(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CurrentUserPrincipal principal) {
+
+        return ResponseEntity.ok(new CategoryResponse(categoryService.get(id, principal)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryResponse> update(
+            @PathVariable Long id,
+            @RequestBody @Valid CategoryRequest dto,
+            @AuthenticationPrincipal CurrentUserPrincipal principal) {
+
+        return ResponseEntity.ok(new CategoryResponse(categoryService.update(id, dto, principal)));
+    }
 }
