@@ -14,6 +14,7 @@ import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.CategoryRepo;
 import com.example.FinanceManagementApp.repository.TransactionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,7 @@ public class TransactionService {
 
 
 
-
+    @Transactional
     public TransactionResponse createExpense(CurrentUserPrincipal principal, @Valid ExpenseRequest dto) {
         Users user = currentUserService.getCurrentUser(principal);
 
@@ -57,6 +58,7 @@ public class TransactionService {
 
     }
 
+    @Transactional
     public TransactionResponse createIncome(CurrentUserPrincipal principal, @Valid IncomeRequest dto) {
         Users user= currentUserService.getCurrentUser(principal);
 
@@ -80,10 +82,41 @@ public class TransactionService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Transaction not found"));
     }
 
-    public List<Transaction> list(CurrentUserPrincipal principal, Integer month, Integer year, TransactionType type, Long categoryId, TransactionSourceType sourceType, LocalDate from, LocalDate to) {
+
+    public List<Transaction> list(
+            CurrentUserPrincipal principal,
+            Integer month,
+            Integer year,
+            TransactionType type,
+            Long categoryId,
+            TransactionSourceType sourceType,
+            LocalDate from,
+            LocalDate to
+    ) {
+        return transactionRepo.filter(
+                principal.getId(),
+                month,
+                year,
+                type,
+                categoryId,
+                sourceType,
+                from,
+                to
+        );
     }
 
+    @Transactional
+    public void createFromBill(){
 
+    }
+    @Transactional
+    public void createFromSubscription(){
+
+    }
+    @Transactional
+    public void createFromPlannedExpense(){
+
+    }
 
 
 
@@ -95,7 +128,7 @@ public class TransactionService {
 
     private void ensureCategoryType(Category category, TransactionType expected) {
         if (category.getType() != expected) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Transaction type mismatch. Expected: " + expected);
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Transaction type mismatch. Expected: " + expected + ", category Type: " + category.getType());
         }
     }
 
@@ -131,33 +164,4 @@ public class TransactionService {
         return tx;
     }
 
-
-    //mapping builder ile
-    /*private TransactionResponse toResponse(Transaction tx,String warning) {
-
-        Category category = tx.getCategory();
-
-        return TransactionResponse.builder()
-                .id(tx.getId())
-                .originalAmount(tx.getOriginalAmount())
-                .originalCurrency(tx.getOriginalCurrency())
-
-                .convertedAmount(tx.getConvertedAmount())
-                .convertedCurrency(tx.getConvertedCurrency())
-
-                .rate(tx.getRate())
-
-                .type(tx.getType())
-                .transactionDate(tx.getTransactionDate())
-                .description(tx.getDescription())
-
-                .categoryId(category != null ? category.getId() : null)
-                .categoryName(category != null ? category.getName() : null)
-
-                .sourceType(tx.getSourceType())
-                .sourceId(tx.getSourceId())
-
-                .warning(warning)
-                .build();
-    }*/
 }
