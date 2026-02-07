@@ -28,6 +28,10 @@ public class Bill {
 
     private String name;
 
+    @ManyToOne(optional = false)
+    private Category category;
+
+
     @Column(nullable=false, precision=19, scale=4)
     private BigDecimal amount;
 
@@ -47,6 +51,8 @@ public class Bill {
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+
 
 
 

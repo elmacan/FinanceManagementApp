@@ -17,6 +17,12 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(optional=false)
+    private Users user;
+
+    @ManyToOne
+    private Category category;
+
     @Column(nullable=false, precision=19, scale=4)
     private BigDecimal originalAmount;
 
@@ -30,6 +36,8 @@ public class Transaction {
     @Column(nullable=false, precision=19, scale=4)
     private BigDecimal convertedAmount;  //userın base currency sine göre xxx
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private CurrencyType convertedCurrency;  //= işlem anındaki user.baseCurrency   (user base değiştirir diye)
 
     //base currency ile yapılan işlemlerde rate = 1 ve convertedAmount = originalAmount set edilmeli
@@ -39,31 +47,40 @@ public class Transaction {
     private TransactionType type;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionSourceType sourceType;
 
     private Long sourceId;
-
-
 
     @Column(nullable = false)
     private LocalDateTime transactionDate;  //user input
 
 
+    //normalde türetilmiş veri saklanmaz
+    //rapor vs için sürekli sorgu gerekcek
+    @Column(nullable=false)
+    private Integer month;
+
+    @Column(nullable=false)
+    private Integer year;
+
     @Column(nullable = false,updatable = false)
     private LocalDateTime createdAt;
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @ManyToOne
-    private Category category;
-
-
-    @ManyToOne(optional=false)
-    private Users user;
 
     private String description;
+
+    @PrePersist
+    public void onCreate() {
+
+        this.createdAt = LocalDateTime.now();
+        this.month = transactionDate.getMonthValue();
+        this.year = transactionDate.getYear();
+
+    }
+
+
+
+
 
 
 }

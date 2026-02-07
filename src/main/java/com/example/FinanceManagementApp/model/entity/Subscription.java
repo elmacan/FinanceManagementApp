@@ -24,6 +24,10 @@ public class Subscription {
 
     private String name;
 
+    @ManyToOne(optional = false)
+    private Category category;
+
+
     @Column(nullable=false, precision=19, scale=4)
     private BigDecimal monthlyAmount;
 

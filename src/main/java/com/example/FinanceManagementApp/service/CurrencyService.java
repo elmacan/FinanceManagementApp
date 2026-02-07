@@ -15,7 +15,7 @@ import java.util.Map;
 public class CurrencyService {
 
 
-     //TRY base rate table
+     //TRY base rate table (demo)
 
     private static final Map<CurrencyType, BigDecimal> TRY_BASE_RATES = new EnumMap<>(CurrencyType.class);
 

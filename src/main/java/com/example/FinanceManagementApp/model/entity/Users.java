@@ -1,6 +1,7 @@
 package com.example.FinanceManagementApp.model.entity;
 
 import com.example.FinanceManagementApp.model.enums.CurrencyType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,11 +23,13 @@ public class Users {
     private String userName;
     @Column(nullable = false, unique=true)
     private String email;
+
+    @JsonIgnore
     @Column(nullable=false)
     private String password;
 
     @Column(precision=19, scale=4)
-    private BigDecimal monthlyIncome =BigDecimal.ZERO;;   //default=0
+    private BigDecimal monthlyIncome =BigDecimal.ZERO;   //default=0
 
     @Column(nullable=false)
     @Enumerated(EnumType.STRING)

@@ -28,6 +28,10 @@ public class PlannedExpense {
 
     private String title;
 
+    @ManyToOne(optional = false)
+    private Category category;
+
+
     @Column(nullable=false, precision=19, scale=4)
     private BigDecimal amount;
 
@@ -35,9 +39,6 @@ public class PlannedExpense {
 
     @Column(nullable=false)
     private Boolean completed=false;
-
-    @ManyToOne
-    private Category category;
 
     @ManyToOne(optional = false)
     private Users user;
