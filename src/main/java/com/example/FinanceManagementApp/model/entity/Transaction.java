@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -53,7 +54,7 @@ public class Transaction {
     private Long sourceId;
 
     @Column(nullable = false)
-    private LocalDateTime transactionDate;  //user input
+    private LocalDate transactionDate;  //user input
 
 
     //normalde türetilmiş veri saklanmaz
