@@ -1,6 +1,8 @@
 package com.example.FinanceManagementApp.repository;
 
+import com.example.FinanceManagementApp.model.entity.Category;
 import com.example.FinanceManagementApp.model.entity.Transaction;
+import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.model.enums.TransactionSourceType;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -41,4 +44,15 @@ public interface TransactionRepo extends JpaRepository<Transaction, Long>{
             @Param("to") LocalDate to
     );
 
+
+    @Query("""
+        select coalesce(sum(t.convertedAmount),0)
+        from Transaction t
+        where t.user = :user
+        and t.category = :category
+        and t.month = :month
+        and t.year = :year
+        and t.type = 'EXPENSE'
+        """)
+    BigDecimal sumExpenseForBudget(Users user, Category category, Integer month, Integer year);
 }
