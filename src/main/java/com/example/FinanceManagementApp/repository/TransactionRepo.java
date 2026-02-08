@@ -55,4 +55,6 @@ public interface TransactionRepo extends JpaRepository<Transaction, Long>{
         and t.type = 'EXPENSE'
         """)
     BigDecimal sumExpenseForBudget(Users user, Category category, Integer month, Integer year);
+
+    boolean existsByUser_IdAndSourceTypeAndSourceId(Long userId, TransactionSourceType sourceType, Long sourceId);
 }

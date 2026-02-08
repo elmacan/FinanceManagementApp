@@ -6,6 +6,7 @@ import com.example.FinanceManagementApp.dto.request.IncomeRequest;
 import com.example.FinanceManagementApp.dto.response.BudgetWarningResponse;
 import com.example.FinanceManagementApp.dto.response.TransactionResponse;
 import com.example.FinanceManagementApp.exception.ApiException;
+import com.example.FinanceManagementApp.model.entity.Bill;
 import com.example.FinanceManagementApp.model.entity.Category;
 import com.example.FinanceManagementApp.model.entity.Transaction;
 import com.example.FinanceManagementApp.model.entity.Users;
@@ -120,7 +121,51 @@ public class TransactionService {
     }
 
     @Transactional
-    public void createFromBill(){
+    public TransactionResponse createFromBill(Bill bill, Users user) {
+        Category category = bill.getCategory();
+
+        if (category.getType() != TransactionType.EXPENSE) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "Bill category must be EXPENSE");
+        }
+
+        boolean exists = transactionRepo
+                .existsByUser_IdAndSourceTypeAndSourceId(
+                        user.getId(),
+                        TransactionSourceType.BILL,
+                        bill.getId()
+                );
+
+        if (exists) {
+            throw new ApiException(HttpStatus.CONFLICT,
+                    "Transaction already created for this bill");
+        }
+
+        ExpenseRequest dto=new ExpenseRequest();
+        dto.setAmount(bill.getAmount());
+        dto.setCurrency(user.getBaseCurrency()); // bill currency yok
+        dto.setTransactionDate(LocalDate.now());
+        dto.setCategoryId(category.getId());
+        dto.setDescription("Bill: " + bill.getName());
+
+        Transaction tx=build(dto,user,category,TransactionType.EXPENSE);
+
+        tx.setSourceType(TransactionSourceType.BILL);
+        tx.setSourceId(bill.getId());
+
+        Transaction saved = transactionRepo.save(tx);
+
+        List<BudgetWarningResponse> warnings =
+                budgetService.checkExpenseAndWarnings(
+                        user,
+                        category.getId(),
+                        category.getName(),
+                        saved.getConvertedAmount(),
+                        saved.getMonth(),
+                        saved.getYear()
+                );
+
+        return new TransactionResponse(saved, warnings);
 
     }
     @Transactional
@@ -163,7 +208,6 @@ public class TransactionService {
 
        Transaction tx = new Transaction();
        tx.setUser(user);
-       tx.setType(TransactionType.INCOME);
 
        tx.setCategory(category);
        tx.setTransactionDate(dto.getTransactionDate());
