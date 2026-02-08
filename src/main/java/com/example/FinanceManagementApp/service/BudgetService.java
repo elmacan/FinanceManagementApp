@@ -2,26 +2,26 @@ package com.example.FinanceManagementApp.service;
 
 import com.example.FinanceManagementApp.dto.request.BudgetRequest;
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
+import com.example.FinanceManagementApp.dto.response.BudgetWarningResponse;
 import com.example.FinanceManagementApp.exception.ApiException;
 import com.example.FinanceManagementApp.model.entity.Budget;
 import com.example.FinanceManagementApp.model.entity.Category;
-import com.example.FinanceManagementApp.model.entity.Transaction;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
+import com.example.FinanceManagementApp.model.enums.WarningLevel;
 import com.example.FinanceManagementApp.repository.BudgetRepo;
 import com.example.FinanceManagementApp.repository.CategoryRepo;
 import com.example.FinanceManagementApp.repository.TransactionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,6 +35,7 @@ public class BudgetService {
     private CategoryRepo categoryRepo;
     @Autowired
     private TransactionRepo transactionRepo;
+
 
 
 
@@ -160,5 +161,122 @@ public class BudgetService {
         return r;
 
     }
+
+    public List<BudgetWarningResponse> checkExpenseAndWarnings(Users user, Long categoryId, String categoryName, BigDecimal convertedAmount, int month, int year) {
+
+        List<BudgetWarningResponse> warnings = new ArrayList<>();
+        Long userId = user.getId();
+
+        budgetRepo.findByUser_IdAndCategory_IdAndMonthAndYear(
+                userId, categoryId, month, year
+        ).ifPresent(budget -> {
+
+            BigDecimal spentBefore = transactionRepo
+                    .sumExpenseForBudget(user,
+                            budget.getCategory(),
+                            month,
+                            year);
+
+            BigDecimal spentAfter =
+                    spentBefore.add(convertedAmount);
+
+            warnings.addAll(
+                    buildWarning(
+                            "CATEGORY",
+                            categoryId,
+                            categoryName,
+                            budget.getLimitAmount(),
+                            spentAfter
+                    )
+            );
+        });
+
+        budgetRepo.findByUser_IdAndCategoryIsNullAndMonthAndYear(
+                userId, month, year
+        ).ifPresent(totalBudget -> {
+
+            BigDecimal spentBefore =
+                    transactionRepo.sumExpenseForBudget(
+                            user,
+                            null,
+                            month,
+                            year
+                    );
+
+            BigDecimal spentAfter =
+                    spentBefore.add(convertedAmount);
+
+            warnings.addAll(
+                    buildWarning(
+                            "TOTAL",
+                            null,
+                            null,
+                            totalBudget.getLimitAmount(),
+                            spentAfter
+                    )
+            );
+        });
+
+        return warnings;
+
+
+
+    }
+
+    private List<BudgetWarningResponse> buildWarning(
+            String scope,
+            Long categoryId,
+            String categoryName,
+            BigDecimal limit,
+            BigDecimal spentAfter
+    ) {
+
+        List<BudgetWarningResponse> list = new ArrayList<>();
+
+        BigDecimal remaining = limit.subtract(spentAfter);
+
+        int percentUsed = spentAfter
+                .multiply(BigDecimal.valueOf(100))
+                .divide(limit, 0, RoundingMode.HALF_UP)
+                .intValue();
+
+        if (spentAfter.compareTo(limit) > 0) {
+
+            BudgetWarningResponse w = new BudgetWarningResponse();
+            w.setWarningLevel(WarningLevel.EXCEEDED);
+            w.setScope(scope);
+            w.setLimit(limit);
+            w.setSpent(spentAfter);
+            w.setRemaining(remaining);
+            w.setPercentUsed(percentUsed);
+            w.setMessage(scope + " budget exceeded");
+
+            list.add(w);
+            return list;
+        }
+
+        BigDecimal warnThreshold = limit.multiply(BigDecimal.valueOf(0.8));
+
+        if (spentAfter.compareTo(warnThreshold) >= 0) {
+
+            BudgetWarningResponse w = new BudgetWarningResponse();
+            w.setWarningLevel(WarningLevel.WARNING);
+            w.setScope(scope);
+            w.setCategoryId(categoryId);
+            w.setCategoryName(categoryName);
+            w.setLimit(limit);
+            w.setSpent(spentAfter);
+            w.setRemaining(remaining);
+            w.setPercentUsed(percentUsed);
+            w.setMessage(scope + " budget almost full");
+
+            list.add(w);
+        }
+
+        return list;
+    }
+
+
+
 }
 

@@ -10,7 +10,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -38,9 +38,9 @@ public class TransactionResponse {
     private TransactionSourceType sourceType;
     private Long sourceId;
 
-    private String warning;
+    private List<BudgetWarningResponse> budgetWarnings;
 
-    public TransactionResponse(Transaction transaction,String warning) {
+    public TransactionResponse(Transaction transaction, List<BudgetWarningResponse> budgetWarnings) {
         this.id = transaction.getId();
         this.originalAmount = transaction.getOriginalAmount();
         this.originalCurrency = transaction.getOriginalCurrency();
@@ -50,10 +50,14 @@ public class TransactionResponse {
         this.type = transaction.getType();
         this.transactionDate = transaction.getTransactionDate();
         this.description = transaction.getDescription();
-        this.categoryId = transaction.getCategory().getId();
-        this.categoryName = transaction.getCategory().getName();
+
+        if (transaction.getCategory() != null) {
+            this.categoryId = transaction.getCategory().getId();
+            this.categoryName = transaction.getCategory().getName();
+        }
+
         this.sourceType = transaction.getSourceType();
         this.sourceId = transaction.getSourceId();
-        this.warning=warning;
+        this.budgetWarnings = budgetWarnings;
     }
 }

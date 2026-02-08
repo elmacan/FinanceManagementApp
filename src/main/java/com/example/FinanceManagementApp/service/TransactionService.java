@@ -3,6 +3,7 @@ package com.example.FinanceManagementApp.service;
 import com.example.FinanceManagementApp.dto.request.BaseTransactionRequest;
 import com.example.FinanceManagementApp.dto.request.ExpenseRequest;
 import com.example.FinanceManagementApp.dto.request.IncomeRequest;
+import com.example.FinanceManagementApp.dto.response.BudgetWarningResponse;
 import com.example.FinanceManagementApp.dto.response.TransactionResponse;
 import com.example.FinanceManagementApp.exception.ApiException;
 import com.example.FinanceManagementApp.model.entity.Category;
@@ -35,6 +36,8 @@ public class TransactionService {
     private CurrentUserService currentUserService;
     @Autowired
     private CurrencyService  currencyService;
+    @Autowired
+    private BudgetService budgetService;
 
 
 
@@ -50,10 +53,21 @@ public class TransactionService {
         ensureCategoryType(category, TransactionType.EXPENSE);
 
         Transaction tx=build(dto,user,category,TransactionType.EXPENSE);
-        Transaction saved=transactionRepo.save(tx);
-        String warning="budget için warning eklencek";
 
-        return new TransactionResponse(saved,warning);
+        List<BudgetWarningResponse> warnings =
+                budgetService.checkExpenseAndWarnings(
+                        user,
+                        category.getId(),
+                        category.getName(),
+                        tx.getConvertedAmount(),
+                        dto.getTransactionDate().getMonthValue(),
+                        dto.getTransactionDate().getYear()
+                );
+
+
+        Transaction saved=transactionRepo.save(tx);
+
+        return new TransactionResponse(saved,warnings);
 
 
     }
@@ -73,7 +87,7 @@ public class TransactionService {
         Transaction tx=build(dto,user,category,TransactionType.INCOME);
         Transaction saved=transactionRepo.save(tx);
 
-        return new TransactionResponse(saved,null);
+        return new TransactionResponse(saved,List.of());
 
     }
 
@@ -122,9 +136,14 @@ public class TransactionService {
 
 
     private Category getUserCategory(Long userId, Long categoryId) {
+        if (categoryId == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "Category required");
+        }
+
         return categoryRepo.findByIdAndUser_Id(categoryId, userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Category not found"));
-    }
+         }
 
     private void ensureCategoryType(Category category, TransactionType expected) {
         if (category.getType() != expected) {
