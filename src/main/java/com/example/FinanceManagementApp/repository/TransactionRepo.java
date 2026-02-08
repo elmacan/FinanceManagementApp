@@ -49,7 +49,7 @@ public interface TransactionRepo extends JpaRepository<Transaction, Long>{
         select coalesce(sum(t.convertedAmount),0)
         from Transaction t
         where t.user = :user
-        and t.category = :category
+        and (:category is null or t.category = :category)
         and t.month = :month
         and t.year = :year
         and t.type = 'EXPENSE'

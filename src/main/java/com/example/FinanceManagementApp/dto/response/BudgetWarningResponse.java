@@ -2,7 +2,6 @@ package com.example.FinanceManagementApp.dto.response;
 
 import com.example.FinanceManagementApp.model.enums.WarningLevel;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;

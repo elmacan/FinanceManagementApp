@@ -94,7 +94,14 @@ public class BudgetService {
     public List<BudgetResponse> list(Integer month, Integer year, CurrentUserPrincipal principal) {
         Users user=currentUserService.getCurrentUser(principal);
 
-        List<Budget> list = (month != null && year != null)
+        if ((month == null) != (year == null)) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "month and year must be provided together"
+            );
+        }
+
+        List<Budget> list = (month != null)
                 ? budgetRepo.findByUserAndMonthAndYear(user, month, year)
                 : budgetRepo.findByUser(user);
 
@@ -220,7 +227,6 @@ public class BudgetService {
         return warnings;
 
 
-
     }
 
     private List<BudgetWarningResponse> buildWarning(
@@ -233,31 +239,39 @@ public class BudgetService {
 
         List<BudgetWarningResponse> list = new ArrayList<>();
 
+        if (limit == null || limit.signum() == 0) {
+            return list;
+        }
+
         BigDecimal remaining = limit.subtract(spentAfter);
+        BigDecimal warnThreshold = limit.multiply(BigDecimal.valueOf(0.8));
 
         int percentUsed = spentAfter
                 .multiply(BigDecimal.valueOf(100))
                 .divide(limit, 0, RoundingMode.HALF_UP)
                 .intValue();
 
+        String label = scope.equals("TOTAL")
+                ? "Total"
+                : categoryName;
+
         if (spentAfter.compareTo(limit) > 0) {
 
             BudgetWarningResponse w = new BudgetWarningResponse();
             w.setWarningLevel(WarningLevel.EXCEEDED);
             w.setScope(scope);
+            w.setCategoryId(categoryId);
+            w.setCategoryName(categoryName);
             w.setLimit(limit);
             w.setSpent(spentAfter);
             w.setRemaining(remaining);
             w.setPercentUsed(percentUsed);
-            w.setMessage(scope + " budget exceeded");
+            w.setMessage(label + " budget exceeded");
 
             list.add(w);
-            return list;
         }
 
-        BigDecimal warnThreshold = limit.multiply(BigDecimal.valueOf(0.8));
-
-        if (spentAfter.compareTo(warnThreshold) >= 0) {
+        else if (spentAfter.compareTo(warnThreshold) >= 0) {
 
             BudgetWarningResponse w = new BudgetWarningResponse();
             w.setWarningLevel(WarningLevel.WARNING);
@@ -268,15 +282,35 @@ public class BudgetService {
             w.setSpent(spentAfter);
             w.setRemaining(remaining);
             w.setPercentUsed(percentUsed);
-            w.setMessage(scope + " budget almost full");
+            w.setMessage(label + " budget almost full");
+
+            list.add(w);
+
+        }
+        else {
+
+            BudgetWarningResponse w = new BudgetWarningResponse();
+            w.setWarningLevel(WarningLevel.INFO);
+            w.setScope(scope);
+            w.setCategoryId(categoryId);
+            w.setCategoryName(categoryName);
+            w.setLimit(limit);
+            w.setSpent(spentAfter);
+            w.setRemaining(remaining);
+            w.setPercentUsed(percentUsed);
+            w.setMessage(label + " remaining budget: " + remaining);
 
             list.add(w);
         }
 
         return list;
     }
-
-
-
 }
+
+
+
+
+
+
+
 
