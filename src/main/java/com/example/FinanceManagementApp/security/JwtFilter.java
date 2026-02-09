@@ -1,5 +1,7 @@
 package com.example.FinanceManagementApp.security;
 
+import com.example.FinanceManagementApp.model.entity.Users;
+import com.example.FinanceManagementApp.repository.UsersRepo;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +25,9 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Autowired
+    private UsersRepo userRepo;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
@@ -42,7 +47,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (jwtService.isTokenValid(token)) {
 
-                CurrentUserPrincipal principal=new CurrentUserPrincipal(userId,email);
+                Users user = userRepo.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+
+                CurrentUserPrincipal principal = new CurrentUserPrincipal(user);
 
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(principal, null, List.of());

@@ -15,6 +15,7 @@ import com.example.FinanceManagementApp.repository.TransactionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
     @Autowired
@@ -31,11 +33,9 @@ public class TransactionService {
     @Autowired
     private CategoryRepo categoryRepo;
     @Autowired
-    private CurrentUserService currentUserService;
-    @Autowired
     private CurrencyService  currencyService;
-    @Autowired
-    private BudgetService budgetService;
+
+    private final BudgetService budgetService;
 
 
 
@@ -45,7 +45,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse createExpense(CurrentUserPrincipal principal, @Valid ExpenseRequest dto) {
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
         Category category = getUserCategory(user.getId(), dto.getCategoryId());
         ensureCategoryType(category, TransactionType.EXPENSE);
@@ -72,7 +72,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse createIncome(CurrentUserPrincipal principal, @Valid IncomeRequest dto) {
-        Users user= currentUserService.getCurrentUser(principal);
+        Users user= principal.getUser();
 
         Category category=null;
         //category optional income için
@@ -199,7 +199,7 @@ public class TransactionService {
         tx.setSourceId(sub.getId());
 
         Transaction saved = transactionRepo.save(tx);
-        
+
     }
 
 

@@ -24,14 +24,13 @@ import java.util.List;
 public class SubscriptionService {
    @Autowired private SubscriptionRepo subscriptionRepo;
     @Autowired private CategoryRepo categoryRepo;
-    @Autowired private CurrentUserService currentUserService;
     @Autowired private TransactionService transactionService;
 
 
 
     @Transactional
     public SubscriptionResponse create(CurrentUserPrincipal principal, @Valid SubscriptionRequest dto) {
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
         if (subscriptionRepo.existsByUser_IdAndNameIgnoreCase(user.getId(), dto.getName())) {
             throw new ApiException(HttpStatus.CONFLICT, "Subscription name already exists");
@@ -65,14 +64,14 @@ public class SubscriptionService {
 
 
     public SubscriptionResponse get(CurrentUserPrincipal principal, Long id) {
-        Long userId = currentUserService.getCurrentUser(principal).getId();
+        Long userId = principal.getId();
         Subscription s = subscriptionRepo.findByIdAndUser_Id(id, userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Subscription not found"));
         return new SubscriptionResponse(s);
     }
 
     public List<SubscriptionResponse> list(CurrentUserPrincipal principal,Boolean active) {
-        Long userId = currentUserService.getCurrentUserId(principal);
+        Long userId = principal.getId();
 
         List<Subscription> list = (active == null)
                 ? subscriptionRepo.findByUser_Id(userId)
@@ -84,7 +83,7 @@ public class SubscriptionService {
 
     @Transactional
     public SubscriptionResponse update(CurrentUserPrincipal principal, Long id, @Valid SubscriptionUpdateRequest dto) {
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
         Subscription s = getOwned(user.getId(), id);
 
@@ -113,8 +112,7 @@ public class SubscriptionService {
 
     @Transactional
     public SubscriptionResponse activate(CurrentUserPrincipal principal, Long id) {
-        Users user = currentUserService.getCurrentUser(principal);
-
+        Users user = principal.getUser();
         Subscription s = getOwned(user.getId(), id);
 
         s.setActive(true);
@@ -129,7 +127,7 @@ public class SubscriptionService {
 
     @Transactional
     public SubscriptionResponse deactivate(CurrentUserPrincipal principal, Long id) {
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
         Subscription s = getOwned(user.getId(), id);
 

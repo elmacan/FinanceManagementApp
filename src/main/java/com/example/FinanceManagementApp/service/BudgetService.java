@@ -30,8 +30,6 @@ public class BudgetService {
     @Autowired
     private BudgetRepo budgetRepo;
     @Autowired
-    private  CurrentUserService currentUserService;
-    @Autowired
     private CategoryRepo categoryRepo;
     @Autowired
     private TransactionRepo transactionRepo;
@@ -41,7 +39,7 @@ public class BudgetService {
 
     @Transactional
     public BudgetResponse create(@Valid BudgetRequest dto, CurrentUserPrincipal principal) {
-        Users user=currentUserService.getCurrentUser(principal);
+        Users user=principal.getUser();
 
         //nullsa total budget
         Category category=null;
@@ -80,7 +78,7 @@ public class BudgetService {
     }
 
     public BudgetResponse get(Long id, CurrentUserPrincipal principal) {
-        Long userId = currentUserService.getCurrentUserId(principal);
+        Long userId = principal.getId();
 
         Budget b = budgetRepo.findByIdAndUser_Id(id, userId)
                 .orElseThrow(() -> new ApiException(
@@ -92,7 +90,7 @@ public class BudgetService {
 
 
     public List<BudgetResponse> list(Integer month, Integer year, CurrentUserPrincipal principal) {
-        Users user=currentUserService.getCurrentUser(principal);
+        Users user=principal.getUser();
 
         if ((month == null) != (year == null)) {
             throw new ApiException(
@@ -119,7 +117,7 @@ public class BudgetService {
                     "limitAmount is required");
         }
 
-        Long userId = currentUserService.getCurrentUser(principal).getId();
+        Long userId = principal.getId();
 
         Budget budget = budgetRepo.findByIdAndUser_Id(budgetId, userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Budget not found"));

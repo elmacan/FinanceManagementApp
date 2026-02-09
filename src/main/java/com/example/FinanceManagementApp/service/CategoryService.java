@@ -23,8 +23,6 @@ public class CategoryService {
 
     @Autowired
     CategoryRepo categoryRepo;
-    @Autowired
-    CurrentUserService currentUserService;
 
     private String normalize(String s) {
         if (s == null) return null;
@@ -36,8 +34,8 @@ public class CategoryService {
     public List<CategoryResponse> getCategories(CurrentUserPrincipal principal, TransactionType type) {
 
         List<Category> categoryList=(type==null)
-            ? categoryRepo.findByUserId(currentUserService.getCurrentUserId(principal))
-            : categoryRepo.findByUserIdAndType(currentUserService.getCurrentUserId(principal),type);
+            ? categoryRepo.findByUserId(principal.getId())
+            : categoryRepo.findByUserIdAndType(principal.getId(), type);
 
         List<CategoryResponse> responseList = new ArrayList<>();
 
@@ -52,7 +50,7 @@ public class CategoryService {
 
     public Category create(@Valid CategoryRequest dto, CurrentUserPrincipal principal) {
         String name = normalize(dto.getName());
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
 
         boolean exists =
@@ -76,7 +74,7 @@ public class CategoryService {
 
 
     public Category get(Long id, CurrentUserPrincipal principal) {
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
         Category c = categoryRepo.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Category not found"));
@@ -89,7 +87,7 @@ public class CategoryService {
 
 
     public Category update(Long id, @Valid CategoryRequest dto, CurrentUserPrincipal principal) {
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
         Category c = categoryRepo.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Category not found"));

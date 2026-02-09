@@ -19,18 +19,16 @@ public class UsersService {
     @Autowired
     UsersRepo usersRepo;
 
-    @Autowired
-    CurrentUserService currentUserService;
 
     public UserResponse getUserProfile(CurrentUserPrincipal principal) {
-        Users user=currentUserService.getCurrentUser(principal);
+        Users user=principal.getUser();
         return new UserResponse(user.getId(),user.getEmail(),user.getUserName(),user.getBaseCurrency(),user.getMonthlyIncome());
 
     }
 
     @Transactional
     public void updateUserProfile(CurrentUserPrincipal principal, UpdateUserRequest dto) {
-        Users user=currentUserService.getCurrentUser(principal);
+        Users user=principal.getUser();
 
         if(dto.getUserName()!=null){
             user.setUserName(dto.getUserName());

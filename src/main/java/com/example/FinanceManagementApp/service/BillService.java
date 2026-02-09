@@ -3,7 +3,6 @@ package com.example.FinanceManagementApp.service;
 import com.example.FinanceManagementApp.dto.request.BillRequest;
 import com.example.FinanceManagementApp.dto.response.BillPayResponse;
 import com.example.FinanceManagementApp.dto.response.BillResponse;
-import com.example.FinanceManagementApp.dto.response.TransactionResponse;
 import com.example.FinanceManagementApp.exception.ApiException;
 import com.example.FinanceManagementApp.model.entity.Bill;
 import com.example.FinanceManagementApp.model.entity.Category;
@@ -12,7 +11,6 @@ import com.example.FinanceManagementApp.model.enums.BillStatus;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.BillRepo;
 import com.example.FinanceManagementApp.repository.CategoryRepo;
-import com.example.FinanceManagementApp.repository.TransactionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -28,16 +26,12 @@ public class BillService {
 
     @Autowired private BillRepo billRepo;
     @Autowired private CategoryRepo categoryRepo;
-    @Autowired private CurrentUserService currentUserService;
     @Autowired private TransactionService transactionService;
-    @Autowired private TransactionRepo transactionRepo;
-    @Autowired private CurrencyService currencyService;
-    @Autowired private BudgetService budgetService;
 
 
     @Transactional
     public BillResponse create(CurrentUserPrincipal principal, @Valid BillRequest dto) {
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
         Category category = categoryRepo.findByIdAndUser_Id(dto.getCategoryId(), user.getId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Category not found"));
@@ -97,7 +91,7 @@ public class BillService {
 
     @Transactional
     public BillPayResponse pay(Long billId, CurrentUserPrincipal principal) {
-        Users user = currentUserService.getCurrentUser(principal);
+        Users user = principal.getUser();
 
         Bill bill = billRepo.findByIdAndUser_Id(billId, user.getId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Bill not found"));
