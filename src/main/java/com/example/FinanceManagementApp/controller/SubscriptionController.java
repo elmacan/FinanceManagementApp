@@ -38,7 +38,7 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscriptionService.get(principal, id));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<SubscriptionResponse> update(
             @AuthenticationPrincipal CurrentUserPrincipal principal,
             @PathVariable Long id,

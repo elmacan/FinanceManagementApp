@@ -11,6 +11,7 @@ import com.example.FinanceManagementApp.repository.RefreshTokenRepo;
 import com.example.FinanceManagementApp.repository.UsersRepo;
 import com.example.FinanceManagementApp.security.JwtService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,29 +20,22 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class AuthService {
 
-    @Autowired
-    private UsersRepo userRepo;
+    private final UsersRepo userRepo;
 
-    @Autowired
-    private AuthenticationManager authManager;
+    private final AuthenticationManager authManager;
 
-    @Autowired
-    private PasswordEncoder encoder;
+    private final PasswordEncoder encoder;
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
-    @Autowired
-    private RefreshTokenService refreshTokenService;
-    @Autowired
-    private RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenRepo refreshTokenRepo;
 
-    @Autowired
-    private SubscriptionService subscriptionService;
-
+    private final SubscriptionService subscriptionService;
 
 
     public void register(RegisterRequest dto) {

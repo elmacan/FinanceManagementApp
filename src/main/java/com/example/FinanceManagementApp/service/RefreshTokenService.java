@@ -5,21 +5,22 @@ import com.example.FinanceManagementApp.exception.ApiException;
 import com.example.FinanceManagementApp.model.entity.RefreshToken;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.repository.RefreshTokenRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.UUID;
-
+@RequiredArgsConstructor
 @Service
 public class RefreshTokenService {
 
     private static final long REFRESH_TOKEN_DURATION =
             1000L * 60 * 60 * 24 ; // 1gün
 
-    @Autowired
-    private RefreshTokenRepo refreshTokenRepo;
+
+    private final RefreshTokenRepo refreshTokenRepo;
 
 
     public RefreshToken generateRefreshToken(Users user) {

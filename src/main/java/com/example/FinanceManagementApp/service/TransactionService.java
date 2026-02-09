@@ -28,12 +28,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionService {
 
-    @Autowired
-    private TransactionRepo transactionRepo;
-    @Autowired
-    private CategoryRepo categoryRepo;
-    @Autowired
-    private CurrencyService  currencyService;
+
+    private final TransactionRepo transactionRepo;
+
+    private final CategoryRepo categoryRepo;
+
+    private final CurrencyService  currencyService;
 
     private final BudgetService budgetService;
 

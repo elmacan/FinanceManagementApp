@@ -14,6 +14,7 @@ import com.example.FinanceManagementApp.repository.CategoryRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,12 +22,13 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class BillService {
 
-    @Autowired private BillRepo billRepo;
-    @Autowired private CategoryRepo categoryRepo;
-    @Autowired private TransactionService transactionService;
+    private final BillRepo billRepo;
+    private final CategoryRepo categoryRepo;
+    private final TransactionService transactionService;
 
 
     @Transactional

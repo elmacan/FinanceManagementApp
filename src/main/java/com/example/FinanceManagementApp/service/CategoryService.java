@@ -9,6 +9,7 @@ import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.CategoryRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
@@ -18,11 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+@RequiredArgsConstructor
 @Service
 public class CategoryService {
 
-    @Autowired
-    CategoryRepo categoryRepo;
+    private final CategoryRepo categoryRepo;
 
     private String normalize(String s) {
         if (s == null) return null;

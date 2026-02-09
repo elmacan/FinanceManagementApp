@@ -7,17 +7,18 @@ import com.example.FinanceManagementApp.repository.UsersRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@RequiredArgsConstructor
 @Service
 public class UsersService {
-
-    @Autowired
-    UsersRepo usersRepo;
+    
+    private final UsersRepo usersRepo;
 
 
     public UserResponse getUserProfile(CurrentUserPrincipal principal) {

@@ -15,6 +15,7 @@ import com.example.FinanceManagementApp.repository.TransactionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,15 +25,13 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class BudgetService {
 
-    @Autowired
-    private BudgetRepo budgetRepo;
-    @Autowired
-    private CategoryRepo categoryRepo;
-    @Autowired
-    private TransactionRepo transactionRepo;
+    private final BudgetRepo budgetRepo;
+    private final CategoryRepo categoryRepo;
+    private final TransactionRepo transactionRepo;
 
 
 

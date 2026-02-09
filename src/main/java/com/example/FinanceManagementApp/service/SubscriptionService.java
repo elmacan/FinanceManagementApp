@@ -13,6 +13,7 @@ import com.example.FinanceManagementApp.repository.SubscriptionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,13 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+@RequiredArgsConstructor
 @Service
 public class SubscriptionService {
-   @Autowired private SubscriptionRepo subscriptionRepo;
-    @Autowired private CategoryRepo categoryRepo;
-    @Autowired private TransactionService transactionService;
+    private final SubscriptionRepo subscriptionRepo;
+    private final CategoryRepo categoryRepo;
+    private final TransactionService transactionService;
 
 
 
@@ -87,17 +90,33 @@ public class SubscriptionService {
 
         Subscription s = getOwned(user.getId(), id);
 
-        if (!s.getName().equalsIgnoreCase(dto.getName())
+        if(dto.getName() != null) {
+
+            if(dto.getName().trim().isEmpty()) {
+                throw new ApiException(BAD_REQUEST,"name cannot be blank ");
+            }
+
+                if (!s.getName().equalsIgnoreCase(dto.getName())
                 && subscriptionRepo.existsByUser_IdAndNameIgnoreCase(user.getId(), dto.getName())) {
             throw new ApiException(HttpStatus.CONFLICT, "Subscription name already exists");
+                }
+
+            s.setName(dto.getName().trim());
         }
 
-        Category category = getExpenseCategory(user.getId(), dto.getCategoryId());
+        if(dto.getCategoryId() != null) {
+            Category category = getExpenseCategory(user.getId(), dto.getCategoryId());
+            s.setCategory(category);
+        }
 
-        s.setName(dto.getName().trim());
-        s.setCategory(category);
-        s.setMonthlyAmount(dto.getMonthlyAmount());
-        s.setBillingDay(dto.getBillingDay());
+        if (dto.getMonthlyAmount() != null) {
+            s.setMonthlyAmount(dto.getMonthlyAmount());
+        }
+
+        if (dto.getBillingDay() != null) {
+            s.setBillingDay(dto.getBillingDay());
+        }
+
 
         Subscription saved = subscriptionRepo.save(s);
 
@@ -177,7 +196,7 @@ public class SubscriptionService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Category not found"));
 
         if (c.getType() != TransactionType.EXPENSE) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Subscription category must be EXPENSE");
+            throw new ApiException(BAD_REQUEST, "Subscription category must be EXPENSE");
         }
         return c;
     }
