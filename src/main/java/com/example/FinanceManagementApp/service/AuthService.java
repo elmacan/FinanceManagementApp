@@ -39,6 +39,10 @@ public class AuthService {
     @Autowired
     private RefreshTokenRepo refreshTokenRepo;
 
+    @Autowired
+    private SubscriptionService subscriptionService;
+
+
 
     public void register(RegisterRequest dto) {
 
@@ -68,6 +72,9 @@ public class AuthService {
             String accessToken = jwtService.generateAccessToken(user);
 
             String refreshToken =refreshTokenService.generateRefreshToken(user).getToken();
+
+            //login sonrası catch-up
+            subscriptionService.generateMissingSubscriptionTransactions(user);
 
 
             return new AuthResponse(accessToken,refreshToken);

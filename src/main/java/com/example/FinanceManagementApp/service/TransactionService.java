@@ -6,10 +6,7 @@ import com.example.FinanceManagementApp.dto.request.IncomeRequest;
 import com.example.FinanceManagementApp.dto.response.BudgetWarningResponse;
 import com.example.FinanceManagementApp.dto.response.TransactionResponse;
 import com.example.FinanceManagementApp.exception.ApiException;
-import com.example.FinanceManagementApp.model.entity.Bill;
-import com.example.FinanceManagementApp.model.entity.Category;
-import com.example.FinanceManagementApp.model.entity.Transaction;
-import com.example.FinanceManagementApp.model.entity.Users;
+import com.example.FinanceManagementApp.model.entity.*;
 import com.example.FinanceManagementApp.model.enums.CurrencyType;
 import com.example.FinanceManagementApp.model.enums.TransactionSourceType;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
@@ -168,10 +165,44 @@ public class TransactionService {
         return new TransactionResponse(saved, warnings);
 
     }
-    @Transactional
-    public void createFromSubscription(){
 
+
+    @Transactional
+    public void createFromSubscription(
+            Subscription sub,
+            Users user,
+            LocalDate date
+    ) {
+        Category category = sub.getCategory();
+
+        boolean exists =
+                transactionRepo.existsByUser_IdAndSourceTypeAndSourceIdAndMonthAndYear(
+                        user.getId(),
+                        TransactionSourceType.SUBSCRIPTION,
+                        sub.getId(),
+                        date.getMonthValue(),
+                        date.getYear()
+                );
+
+        if (exists) return;
+
+        ExpenseRequest dto = new ExpenseRequest();
+        dto.setAmount(sub.getMonthlyAmount());
+        dto.setCurrency(user.getBaseCurrency());
+        dto.setTransactionDate(date);
+        dto.setCategoryId(category.getId());
+        dto.setDescription("Subscription: " + sub.getName());
+
+        Transaction tx = build(dto, user, category, TransactionType.EXPENSE);
+
+        tx.setSourceType(TransactionSourceType.SUBSCRIPTION);
+        tx.setSourceId(sub.getId());
+
+        Transaction saved = transactionRepo.save(tx);
+        
     }
+
+
     @Transactional
     public void createFromPlannedExpense(){
 

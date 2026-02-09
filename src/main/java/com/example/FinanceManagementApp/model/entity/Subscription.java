@@ -42,12 +42,17 @@ public class Subscription {
     @ManyToOne(optional = false)
     private Users user;
 
-    private Boolean autoPay;
+    //Subscription (re)aktif edildiği tarih
+    @Column(nullable=false)
+    private LocalDate activeFrom;
 
     @Column(nullable = false,updatable = false)
     private LocalDateTime createdAt;
+
     @PrePersist
     public void onCreate() {
+
         this.createdAt = LocalDateTime.now();
+        if (activeFrom == null) activeFrom = startDate;
     }
 }
