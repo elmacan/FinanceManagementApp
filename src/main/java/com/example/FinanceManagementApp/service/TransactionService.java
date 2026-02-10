@@ -16,7 +16,6 @@ import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -117,6 +116,8 @@ public class TransactionService {
         );
     }
 
+    //create from methodları düzenlencek ortak yapı ile
+
     @Transactional
     public TransactionResponse createFromBill(Bill bill, Users user) {
         Category category = bill.getCategory();
@@ -203,8 +204,50 @@ public class TransactionService {
     }
 
 
+    //KONTROL
     @Transactional
-    public void createFromPlannedExpense(){
+    public TransactionResponse createFromPlannedExpense(PlannedExpense pe, Users user){
+
+        Category category = pe.getCategory();
+
+        if (category.getType() != TransactionType.EXPENSE) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "PlannedExpense category must be EXPENSE");
+        }
+
+        boolean exists = transactionRepo.existsByUser_IdAndSourceTypeAndSourceId(
+                user.getId(),
+                TransactionSourceType.PLANNED_EXPENSE,
+                pe.getId()
+        );
+
+        if (exists) {
+            throw new ApiException(HttpStatus.CONFLICT, "Transaction already created for this planned expense");
+        }
+
+        ExpenseRequest dto = new ExpenseRequest();
+        dto.setAmount(pe.getOriginalAmount());
+        dto.setCurrency(pe.getOriginalCurrency());
+        dto.setTransactionDate(pe.getPlannedDate());
+        dto.setCategoryId(category.getId());
+        dto.setDescription("PlannedExpense: " + pe.getTitle());
+
+        Transaction tx = build(dto, user, category, TransactionType.EXPENSE);
+        tx.setSourceType(TransactionSourceType.PLANNED_EXPENSE);
+        tx.setSourceId(pe.getId());
+
+        Transaction saved = transactionRepo.save(tx);
+
+        List<BudgetWarningResponse> warnings =
+                budgetService.checkExpenseAndWarnings(
+                        user,
+                        category.getId(),
+                        category.getName(),
+                        saved.getConvertedAmount(),
+                        saved.getMonth(),
+                        saved.getYear()
+                );
+
+        return new TransactionResponse(saved, warnings);
 
     }
 
@@ -257,5 +300,6 @@ public class TransactionService {
 
         return tx;
     }
+
 
 }

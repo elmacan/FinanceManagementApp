@@ -1,5 +1,6 @@
 package com.example.FinanceManagementApp.model.entity;
 
+import com.example.FinanceManagementApp.model.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -31,9 +32,28 @@ public class PlannedExpense {
     @ManyToOne(optional = false)
     private Category category;
 
-
     @Column(nullable=false, precision=19, scale=4)
-    private BigDecimal amount;
+    private BigDecimal originalAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private CurrencyType originalCurrency;
+
+    //planned aşamada da budget var ondan
+    //user base currency
+    @Column(nullable=false, precision=19, scale=4)
+    private BigDecimal convertedAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private CurrencyType convertedCurrency;
+
+    @Column(nullable=false, precision=19, scale=6)
+    private BigDecimal rate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CurrencyType currency;
 
     private LocalDate plannedDate;
 
@@ -42,6 +62,8 @@ public class PlannedExpense {
 
     @ManyToOne(optional = false)
     private Users user;
+
+    private String description;
 
     @Column(nullable = false,updatable = false)
     private LocalDateTime createdAt;

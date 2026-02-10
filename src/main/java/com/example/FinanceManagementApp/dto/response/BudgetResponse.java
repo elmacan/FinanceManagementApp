@@ -19,7 +19,13 @@ public class BudgetResponse {
     private Integer year;
 
     private BigDecimal limit;
+
+    private BigDecimal actualSpent;   // Transaction sum
+    private BigDecimal plannedSpent;  // PlannedExpense sum (completed=false)
+
+    //TOPLAM = actual + planned
     private BigDecimal spentAmount;
+
     private BigDecimal remainingAmount;
     private Integer percentUsed;
     private boolean exceeded;

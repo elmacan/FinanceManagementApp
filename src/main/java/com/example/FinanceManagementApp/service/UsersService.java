@@ -17,7 +17,7 @@ import java.math.RoundingMode;
 @RequiredArgsConstructor
 @Service
 public class UsersService {
-    
+
     private final UsersRepo usersRepo;
 
 
