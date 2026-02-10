@@ -25,12 +25,7 @@ public class SavingGoalRequest {
 
     private LocalDate targetDate;
 
-    public SavingGoalRequest(SavingGoal s) {
-        this.title = s.getTitle();
-        this.targetAmount = s.getTargetAmount();
-        this.currency = s.getCurrency();
-        this.targetDate = s.getTargetDate();
-    }
+
 }
 
 

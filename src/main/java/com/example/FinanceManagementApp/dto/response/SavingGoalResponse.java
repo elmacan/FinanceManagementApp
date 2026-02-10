@@ -22,7 +22,11 @@ public class SavingGoalResponse {
 
     private BigDecimal currentAmount;
     private BigDecimal remainingAmount;
-    private Integer percent;
+    private Integer goalProgressPercent;
+
+
+    private Boolean overdue;
+
 
     public SavingGoalResponse(SavingGoal s,BigDecimal currentAmount) {
         this.id = s.getId();
@@ -43,13 +47,20 @@ public class SavingGoalResponse {
                         .max(BigDecimal.ZERO);
 
         if (s.getTargetAmount() != null && s.getTargetAmount().signum() > 0) {
-            this.percent = currentAmount
+            this.goalProgressPercent = currentAmount
                     .multiply(BigDecimal.valueOf(100))
                     .divide(s.getTargetAmount(), 0, RoundingMode.HALF_UP)
                     .intValue();
         } else {
-            this.percent = 0;
+            this.goalProgressPercent = 0;
         }
-        if (this.percent > 100) this.percent = 100;
+        if (this.goalProgressPercent > 100) this.goalProgressPercent = 100;
+
+        LocalDate today = LocalDate.now();
+
+        this.overdue =
+                s.getTargetDate() != null &&
+                        s.getTargetDate().isBefore(LocalDate.now());
+
     }
 }
