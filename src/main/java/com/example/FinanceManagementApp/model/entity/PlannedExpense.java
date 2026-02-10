@@ -57,6 +57,8 @@ public class PlannedExpense {
     @Column(nullable=false)
     private Boolean completed=false;
 
+   // private LocalDate completedAt;
+
     @ManyToOne(optional = false)
     private Users user;
 

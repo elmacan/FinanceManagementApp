@@ -45,6 +45,6 @@ public class SavingGoal {
     private Users user;
 
     @OneToMany(mappedBy = "goal", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SavingTransaction> savingTransactionList = new ArrayList<>();
+    private List<SavingEntry> savingEntryList = new ArrayList<>();
 
 }

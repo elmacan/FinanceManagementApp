@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-public class SavingTransaction {
+public class SavingEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
