@@ -140,6 +140,9 @@ public class BudgetServiceImpl implements BudgetService {
                 b.getMonth(),
                 b.getYear()
         );
+        if (actualSpent == null) {
+            actualSpent = BigDecimal.ZERO;
+        }
 
         BigDecimal plannedSpent = plannedExpenseRepo.sumPlannedForBudget(
                 user,
@@ -147,18 +150,26 @@ public class BudgetServiceImpl implements BudgetService {
                 b.getMonth(),
                 b.getYear()
         );
+        if (plannedSpent == null) {
+            plannedSpent = BigDecimal.ZERO;
+        }
 
-        BigDecimal spent = actualSpent.add(plannedSpent);
-        BigDecimal remaining = b.getLimitAmount().subtract(spent);
+        BigDecimal limit = b.getLimitAmount();
 
-        int percent = b.getLimitAmount().signum() == 0
-                ? 0
-                : spent.multiply(BigDecimal.valueOf(100))
-                .divide(b.getLimitAmount(), 0, RoundingMode.HALF_UP)
-                .intValue();
+        BigDecimal totalWithPlan = actualSpent.add(plannedSpent);
+
+        BigDecimal remainingNow = limit.subtract(actualSpent);
+        BigDecimal remainingWithPlan = limit.subtract(totalWithPlan);
+
+        int percentNow = percent(actualSpent, limit);
+        int percentWithPlan = percent(totalWithPlan, limit);
+
+        boolean exceededNow = actualSpent.compareTo(limit) > 0;
+        boolean exceededWithPlan = totalWithPlan.compareTo(limit) > 0;
 
         BudgetResponse r = new BudgetResponse();
         r.setBudgetId(b.getId());
+
 
         if (b.getCategory() == null) {
             r.setScope("TOTAL BUDGET");
@@ -168,18 +179,26 @@ public class BudgetServiceImpl implements BudgetService {
             r.setCategoryName(b.getCategory().getName());
         }
 
-        r.setLimit(b.getLimitAmount());
         r.setMonth(b.getMonth());
         r.setYear(b.getYear());
 
+        r.setBudgetLimit(limit);
 
-        r.setActualSpent(actualSpent);
-        r.setPlannedSpent(plannedSpent);
+        r.setActualExpenseAmount(actualSpent);
+        r.setRemainingBudgetNow(remainingNow);
+        r.setBudgetUsagePercentNow(percentNow);
+        r.setExceededNow(exceededNow);
 
-        r.setSpentAmount(spent);
-        r.setRemainingAmount(remaining);
-        r.setPercentUsed(percent);
-        r.setExceeded(remaining.signum() < 0);
+
+        r.setPlannedExpenseAmount(nullIfZero(plannedSpent));
+
+        if (plannedSpent.signum() != 0) {
+            r.setRemainingBudgetWithPlan(remainingWithPlan);
+            r.setExceededWithPlan(exceededWithPlan);
+            r.setBudgetUsagePercentWithPlan(percentWithPlan);
+            r.setTotalExpenseWithPlan(totalWithPlan);
+        }
+        
 
         return r;
     }
@@ -302,6 +321,32 @@ public class BudgetServiceImpl implements BudgetService {
         list.add(w);
         return list;
     }
+
+
+    private int percent(BigDecimal spent, BigDecimal limit) {
+
+        if (limit == null || limit.signum() == 0) {
+            return 0;
+        }
+        return spent
+                .multiply(BigDecimal.valueOf(100))
+                .divide(limit, 0, RoundingMode.HALF_UP)
+                .intValue();
+    }
+
+    private BigDecimal nullIfZero(BigDecimal v) {
+        return (v == null || v.signum() == 0) ? null : v;
+    }
+
+    private Integer nullIfZero(Integer v) {
+        return (v == null || v == 0) ? null : v;
+    }
+
+    private Boolean nullIfFalse(Boolean v) {
+        return (v == null || !v) ? null : v;
+    }
+
+
 }
 
 

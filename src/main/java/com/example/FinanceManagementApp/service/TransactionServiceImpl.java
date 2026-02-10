@@ -34,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final CurrencyService  currencyService;
 
-    private final BudgetServiceImpl budgetService;
+    private final BudgetService budgetService;
 
 
 
