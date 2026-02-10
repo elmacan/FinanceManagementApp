@@ -4,24 +4,23 @@ package com.example.FinanceManagementApp.controller;
 import com.example.FinanceManagementApp.dto.request.BudgetLimitRequest;
 import com.example.FinanceManagementApp.dto.request.BudgetRequest;
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
-import com.example.FinanceManagementApp.model.entity.Budget;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.BudgetService;
+import com.example.FinanceManagementApp.service.BudgetServiceImpl;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("api/budgets")
 public class BudgetController {
 
-    @Autowired
-    private BudgetService budgetService;
+
+    private final BudgetServiceImpl budgetService;
 
 
 

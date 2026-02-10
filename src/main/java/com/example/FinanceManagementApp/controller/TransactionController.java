@@ -7,9 +7,9 @@ import com.example.FinanceManagementApp.model.entity.Transaction;
 import com.example.FinanceManagementApp.model.enums.TransactionSourceType;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.TransactionService;
+import com.example.FinanceManagementApp.service.TransactionServiceImpl;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("api/transactions")
 public class TransactionController {
 
-    @Autowired
-    TransactionService transactionService;
+
+    private final TransactionServiceImpl transactionService;
 
 
     @PostMapping("/expense")

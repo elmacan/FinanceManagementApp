@@ -4,12 +4,11 @@ package com.example.FinanceManagementApp.controller;
 import com.example.FinanceManagementApp.dto.request.BillRequest;
 import com.example.FinanceManagementApp.dto.response.BillPayResponse;
 import com.example.FinanceManagementApp.dto.response.BillResponse;
-import com.example.FinanceManagementApp.dto.response.TransactionResponse;
 import com.example.FinanceManagementApp.model.enums.BillStatus;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.BillService;
+import com.example.FinanceManagementApp.service.BillServiceImpl;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,12 +16,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/bills")
 public class BillController {
 
-    @Autowired
-    BillService billService;
+
+    private final BillServiceImpl billService;
 
 
     @PostMapping

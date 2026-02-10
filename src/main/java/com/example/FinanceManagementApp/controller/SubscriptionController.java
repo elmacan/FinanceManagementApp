@@ -4,22 +4,22 @@ import com.example.FinanceManagementApp.dto.request.SubscriptionRequest;
 import com.example.FinanceManagementApp.dto.request.SubscriptionUpdateRequest;
 import com.example.FinanceManagementApp.dto.response.SubscriptionResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.SubscriptionService;
+import com.example.FinanceManagementApp.service.SubscriptionServiceImpl;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/subscriptions")
 public class SubscriptionController {
 
-    @Autowired
-    private SubscriptionService subscriptionService;
+
+    private final SubscriptionServiceImpl subscriptionService;
 
 
     @PostMapping

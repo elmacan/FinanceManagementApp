@@ -6,7 +6,7 @@ import com.example.FinanceManagementApp.dto.response.PlannedExpenseResponse;
 import com.example.FinanceManagementApp.dto.response.TransactionResponse;
 import com.example.FinanceManagementApp.model.entity.PlannedExpense;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.PlannedExpenseService;
+import com.example.FinanceManagementApp.service.PlannedExpenseServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequestMapping("/api/planned-expenses")
 @RequiredArgsConstructor
 public class PlannedExpenseController {
-    private final PlannedExpenseService plannedExpenseService;
+    private final PlannedExpenseServiceImpl plannedExpenseService;
 
 
 

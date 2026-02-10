@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 public class SavingTransaction {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable=false, precision=19, scale=4)

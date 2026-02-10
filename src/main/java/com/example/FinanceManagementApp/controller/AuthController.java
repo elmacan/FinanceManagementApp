@@ -7,6 +7,7 @@ import com.example.FinanceManagementApp.dto.response.AuthResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import com.example.FinanceManagementApp.service.AuthService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +15,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
     //http statusler controller içinde olmalı
 
-    @Autowired
-    AuthService authService;
+
+    private final AuthService authService;
 
     @PostMapping("register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest dto){

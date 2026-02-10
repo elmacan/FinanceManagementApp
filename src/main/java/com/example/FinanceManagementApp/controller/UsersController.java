@@ -1,23 +1,20 @@
 package com.example.FinanceManagementApp.controller;
 
-import com.example.FinanceManagementApp.dto.request.LoginRequest;
 import com.example.FinanceManagementApp.dto.request.UpdateUserRequest;
 import com.example.FinanceManagementApp.dto.response.UserResponse;
-import com.example.FinanceManagementApp.model.entity.Users;
-import com.example.FinanceManagementApp.repository.UsersRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.UsersService;
+import com.example.FinanceManagementApp.service.UsersServiceImpl;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("api/users")
 public class UsersController {
-    @Autowired
-    private UsersService usersService;
+
+    private final UsersServiceImpl usersService;
 
 
     @GetMapping("me")                                  //current user
