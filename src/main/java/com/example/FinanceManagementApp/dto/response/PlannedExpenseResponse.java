@@ -34,7 +34,7 @@ public class PlannedExpenseResponse {
         this.categoryId = plannedExpense.getCategory().getId();
         this.categoryName = plannedExpense.getCategory().getName();
         this.amount=plannedExpense.getOriginalAmount();
-        this.currency=plannedExpense.getCurrency();
+        this.currency=plannedExpense.getOriginalCurrency();
         this.convertedAmount=plannedExpense.getConvertedAmount();
         this.convertedCurrency=plannedExpense.getConvertedCurrency();
         this.rate=plannedExpense.getRate();

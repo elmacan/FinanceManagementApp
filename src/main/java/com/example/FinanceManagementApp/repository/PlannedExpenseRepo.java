@@ -24,8 +24,8 @@ public interface PlannedExpenseRepo extends JpaRepository<PlannedExpense, Long> 
     where pe.user = :user
       and (:category is null or pe.category = :category)
       and pe.completed = false
-      and function('month', pe.plannedDate) = :month
-      and function('year', pe.plannedDate) = :year
+      and extract(month from pe.plannedDate) = :month
+      and extract(year from pe.plannedDate) = :year
 """)
     BigDecimal sumPlannedForBudget(Users user, Category category, Integer month, Integer year);
 

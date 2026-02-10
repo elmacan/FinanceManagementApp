@@ -51,9 +51,6 @@ public class PlannedExpense {
     @Column(nullable=false, precision=19, scale=6)
     private BigDecimal rate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CurrencyType currency;
 
     private LocalDate plannedDate;
 

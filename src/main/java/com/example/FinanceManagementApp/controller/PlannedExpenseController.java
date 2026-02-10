@@ -25,9 +25,9 @@ public class PlannedExpenseController {
 
 
     @PostMapping
-    public ResponseEntity<PlannedExpense> create(@AuthenticationPrincipal CurrentUserPrincipal principal,
+    public ResponseEntity<PlannedExpenseResponse> create(@AuthenticationPrincipal CurrentUserPrincipal principal,
                                                 @Valid @RequestBody PlannedExpenseRequest dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(plannedExpenseService.create(principal, dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new PlannedExpenseResponse(plannedExpenseService.create(principal, dto)));
     }
 
 
