@@ -52,20 +52,10 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction tx=build(dto,user,category,TransactionType.EXPENSE);
 
-        List<BudgetWarningResponse> warnings =
-                budgetService.checkExpenseAndWarnings(
-                        user,
-                        category.getId(),
-                        category.getName(),
-                        tx.getConvertedAmount(),
-                        dto.getTransactionDate().getMonthValue(),
-                        dto.getTransactionDate().getYear()
-                );
-
 
         Transaction saved=transactionRepo.save(tx);
 
-        return new TransactionResponse(saved,warnings);
+        return toResponse(saved,true);
 
 
     }
@@ -86,19 +76,22 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction tx=build(dto,user,category,TransactionType.INCOME);
         Transaction saved=transactionRepo.save(tx);
 
-        return new TransactionResponse(saved,List.of());
+        return toResponse(saved,false);
 
     }
 
     @Override
-    public Transaction get(CurrentUserPrincipal principal, Long id) {
-        return transactionRepo.findByIdAndUser_Id(id, principal.getId())
+    public TransactionResponse get(CurrentUserPrincipal principal, Long id) {
+
+        Transaction tx=transactionRepo.findByIdAndUser_Id(id, principal.getId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Transaction not found"));
+
+        return  toResponse(tx,true);
     }
 
 
     @Override
-    public List<Transaction> list(
+    public List<TransactionResponse> list(
             CurrentUserPrincipal principal,
             Integer month,
             Integer year,
@@ -117,7 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
                 sourceType,
                 from,
                 to
-        );
+        ).stream().map(tx -> toResponse(tx, false)).toList();
     }
 
     //create from methodları düzenlencek ortak yapı ile
@@ -158,17 +151,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction saved = transactionRepo.save(tx);
 
-        List<BudgetWarningResponse> warnings =
-                budgetService.checkExpenseAndWarnings(
-                        user,
-                        category.getId(),
-                        category.getName(),
-                        saved.getConvertedAmount(),
-                        saved.getMonth(),
-                        saved.getYear()
-                );
-
-        return new TransactionResponse(saved, warnings);
+        return toResponse(saved,true);
 
     }
 
@@ -205,7 +188,8 @@ public class TransactionServiceImpl implements TransactionService {
         tx.setSourceType(TransactionSourceType.SUBSCRIPTION);
         tx.setSourceId(sub.getId());
 
-        Transaction saved = transactionRepo.save(tx);
+        transactionRepo.save(tx);
+
 
     }
 
@@ -244,17 +228,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction saved = transactionRepo.save(tx);
 
-        List<BudgetWarningResponse> warnings =
-                budgetService.checkExpenseAndWarnings(
-                        user,
-                        category.getId(),
-                        category.getName(),
-                        saved.getConvertedAmount(),
-                        saved.getMonth(),
-                        saved.getYear()
-                );
-
-        return new TransactionResponse(saved, warnings);
+        return  toResponse(saved,true);
 
     }
 
@@ -303,10 +277,33 @@ public class TransactionServiceImpl implements TransactionService {
 
        tx.setType(type);
        tx.setSourceType(TransactionSourceType.MANUAL);
-       tx.setSourceId(null);
 
         return tx;
     }
 
+    private TransactionResponse toResponse(Transaction tx, boolean includeWarnings) {
+
+        List<BudgetWarningResponse> warnings = includeWarnings ? buildWarnings(tx) : List.of();
+
+        return new TransactionResponse(tx, warnings);
+    }
+
+
+    private List<BudgetWarningResponse> buildWarnings(Transaction tx) {
+
+        if (tx.getType() != TransactionType.EXPENSE ||
+                tx.getCategory() == null) {
+            return List.of();
+        }
+
+        return budgetService.checkExpenseAndWarnings(
+                tx.getUser(),
+                tx.getCategory().getId(),
+                tx.getCategory().getName(),
+                tx.getConvertedAmount(),
+                tx.getMonth(),
+                tx.getYear()
+        );
+    }
 
 }

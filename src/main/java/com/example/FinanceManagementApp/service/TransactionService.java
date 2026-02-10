@@ -20,9 +20,9 @@ public interface TransactionService {
     @Transactional
     TransactionResponse createIncome(CurrentUserPrincipal principal, @Valid IncomeRequest dto);
 
-    Transaction get(CurrentUserPrincipal principal, Long id);
+    TransactionResponse get(CurrentUserPrincipal principal, Long id);
 
-    List<Transaction> list(
+    List<TransactionResponse> list(
             CurrentUserPrincipal principal,
             Integer month,
             Integer year,

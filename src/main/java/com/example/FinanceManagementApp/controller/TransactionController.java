@@ -50,7 +50,7 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Transaction> get(
+    public ResponseEntity<TransactionResponse> get(
             @PathVariable Long id,
             @AuthenticationPrincipal CurrentUserPrincipal principal
     ) {
@@ -59,7 +59,7 @@ public class TransactionController {
     }
 
     @GetMapping
-    public List<Transaction> list(
+    public List<TransactionResponse> list(
             @AuthenticationPrincipal CurrentUserPrincipal principal,
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
