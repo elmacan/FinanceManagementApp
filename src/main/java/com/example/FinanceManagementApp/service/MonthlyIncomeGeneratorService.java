@@ -26,8 +26,7 @@ public class MonthlyIncomeGeneratorService {
             return;
         }
 
-        boolean exists =
-                transactionRepo.existsByUser_IdAndSourceTypeAndMonthAndYear(
+        boolean exists = transactionRepo.existsByUser_IdAndSourceTypeAndMonthAndYear(
                         user.getId(),
                         TransactionSourceType.MONTHLY_FIXED_INCOME,
                         month,
@@ -54,4 +53,25 @@ public class MonthlyIncomeGeneratorService {
 
         transactionRepo.save(tx);
     }
+
+    @Transactional
+    public void ensureMonthlyIncomeForLastMonths(
+            Users user,
+            int monthsBack
+    ) {
+        LocalDate now = LocalDate.now();
+
+        for (int i = 0; i < monthsBack; i++) {
+
+            LocalDate d = now.minusMonths(i);
+
+            ensureMonthlyIncome(
+                    user,
+                    d.getMonthValue(),
+                    d.getYear()
+            );
+        }
+    }
+
+
 }

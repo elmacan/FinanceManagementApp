@@ -76,7 +76,10 @@ public class AuthServiceImpl implements AuthService {
             //monthly-income catch-up
             LocalDate now = LocalDate.now();
 
-            monthlyIncomeGeneratorService.ensureMonthlyIncome(user, now.getMonthValue(), now.getYear());
+            //monthlyIncomeGeneratorService.ensureMonthlyIncome(user, now.getMonthValue(), now.getYear());   bu ay dan başlatıyordu
+            monthlyIncomeGeneratorService.ensureMonthlyIncomeForLastMonths(user, 3);
+
+
         System.out.println("LOGIN VERIFY CALLED");
 
 
