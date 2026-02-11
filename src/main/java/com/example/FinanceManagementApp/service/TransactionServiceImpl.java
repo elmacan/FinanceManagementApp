@@ -52,10 +52,11 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction tx=build(dto,user,category,TransactionType.EXPENSE);
 
+        List<BudgetWarningResponse> warnings = computeWarningsBeforeSave(tx);
 
         Transaction saved=transactionRepo.save(tx);
 
-        return toResponse(saved,true);
+        return new TransactionResponse(saved, warnings);
 
 
     }
@@ -76,7 +77,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction tx=build(dto,user,category,TransactionType.INCOME);
         Transaction saved=transactionRepo.save(tx);
 
-        return toResponse(saved,false);
+        return new TransactionResponse(saved, List.of());
 
     }
 
@@ -86,7 +87,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction tx=transactionRepo.findByIdAndUser_Id(id, principal.getId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Transaction not found"));
 
-        return  toResponse(tx,true);
+        return new TransactionResponse(tx, List.of());
     }
 
 
@@ -110,7 +111,7 @@ public class TransactionServiceImpl implements TransactionService {
                 sourceType,
                 from,
                 to
-        ).stream().map(tx -> toResponse(tx, false)).toList();
+        ).stream().map(tx -> new TransactionResponse(tx, List.of())).toList();
     }
 
     //create from methodları düzenlencek ortak yapı ile
@@ -149,9 +150,10 @@ public class TransactionServiceImpl implements TransactionService {
         tx.setSourceType(TransactionSourceType.BILL);
         tx.setSourceId(bill.getId());
 
+        List<BudgetWarningResponse> warnings = computeWarningsBeforeSave(tx);
         Transaction saved = transactionRepo.save(tx);
 
-        return toResponse(saved,true);
+        return new TransactionResponse(saved, warnings);
 
     }
 
@@ -226,9 +228,10 @@ public class TransactionServiceImpl implements TransactionService {
         tx.setSourceType(TransactionSourceType.PLANNED_EXPENSE);
         tx.setSourceId(pe.getId());
 
+        List<BudgetWarningResponse> warnings = computeWarningsBeforeSave(tx);
         Transaction saved = transactionRepo.save(tx);
 
-        return  toResponse(saved,true);
+        return new TransactionResponse(saved, warnings);
 
     }
 
@@ -281,28 +284,22 @@ public class TransactionServiceImpl implements TransactionService {
         return tx;
     }
 
-    private TransactionResponse toResponse(Transaction tx, boolean includeWarnings) {
-
-        List<BudgetWarningResponse> warnings = includeWarnings ? buildWarnings(tx) : List.of();
-
-        return new TransactionResponse(tx, warnings);
-    }
-
-
-    private List<BudgetWarningResponse> buildWarnings(Transaction tx) {
-
-        if (tx.getType() != TransactionType.EXPENSE ||
-                tx.getCategory() == null) {
+    private List<BudgetWarningResponse> computeWarningsBeforeSave(Transaction tx) {
+        if (tx.getType() != TransactionType.EXPENSE || tx.getCategory() == null) {
             return List.of();
         }
+
+
+        int month = tx.getTransactionDate().getMonthValue();
+        int year = tx.getTransactionDate().getYear();
 
         return budgetService.checkExpenseAndWarnings(
                 tx.getUser(),
                 tx.getCategory().getId(),
                 tx.getCategory().getName(),
                 tx.getConvertedAmount(),
-                tx.getMonth(),
-                tx.getYear()
+                month,
+                year
         );
     }
 

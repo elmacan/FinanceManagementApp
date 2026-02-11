@@ -216,20 +216,15 @@ public class BudgetServiceImpl implements BudgetService {
         Long userId = user.getId();
 
         // CATEGORY BUDGET
-
         budgetRepo.findByUser_IdAndCategory_IdAndMonthAndYear(
                 userId, categoryId, month, year
         ).ifPresent(budget -> {
 
             BigDecimal actualBefore = transactionRepo.sumExpenseForBudget(
                     user, budget.getCategory(), month, year);
+            if (actualBefore == null) actualBefore = BigDecimal.ZERO;
 
-            BigDecimal plannedBefore = plannedExpenseRepo.sumPlannedForBudget(
-                    user, budget.getCategory(), month, year);
-
-            BigDecimal spentAfter = actualBefore
-                    .add(plannedBefore)
-                    .add(convertedAmount);
+            BigDecimal spentAfter = actualBefore.add(convertedAmount);
 
             warnings.addAll(
                     buildWarning(
@@ -243,20 +238,15 @@ public class BudgetServiceImpl implements BudgetService {
         });
 
         // TOTAL BUDGET
-
         budgetRepo.findByUser_IdAndCategoryIsNullAndMonthAndYear(
                 userId, month, year
         ).ifPresent(totalBudget -> {
 
             BigDecimal actualBefore = transactionRepo.sumExpenseForBudget(
                     user, null, month, year);
+            if (actualBefore == null) actualBefore = BigDecimal.ZERO;
 
-            BigDecimal plannedBefore = plannedExpenseRepo.sumPlannedForBudget(
-                    user, null, month, year);
-
-            BigDecimal spentAfter = actualBefore
-                    .add(plannedBefore)
-                    .add(convertedAmount);
+            BigDecimal spentAfter = actualBefore.add(convertedAmount);
 
             warnings.addAll(
                     buildWarning(
