@@ -1,6 +1,6 @@
 package com.example.FinanceManagementApp.service;
 
-import com.example.FinanceManagementApp.dto.response.report.CategoryDistributionResponse;
+import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
 import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +76,34 @@ public class ReportService {
         return r;
     }
 
-    public List<CategoryDistributionResponse> categoryDistribution(CurrentUserPrincipal p, Integer month, Integer year) {
-        return null;
+
+    public ExpenseCategoryResponse buildExpenseCategoryReport(CurrentUserPrincipal p, Integer month, Integer year) {
+        List<Object[]> rows = transactionRepo.expenseCategoryDistribution(p.getId(), month, year);
+
+
+        List<ExpenseCategoryResponse.CategoryItem> items = rows.stream()
+                .map(r -> new ExpenseCategoryResponse.CategoryItem(
+                        (Long) r[0],
+                        (String) r[1],
+                        (BigDecimal) r[2],
+                        ((Long) r[3]).intValue()
+                ))
+                .toList();
+
+        BigDecimal totalExpense =
+                transactionRepo.totalExpenseForMonth(
+                        p.getId(),
+                        month,
+                        year
+                );
+        if (totalExpense == null) {
+            totalExpense = BigDecimal.ZERO;
+        }
+        return new ExpenseCategoryResponse(
+                month,
+                year,
+                totalExpense,
+                items
+        );
     }
 }

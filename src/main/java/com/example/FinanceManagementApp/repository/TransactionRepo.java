@@ -94,4 +94,41 @@ public interface TransactionRepo extends JpaRepository<Transaction, Long>{
         """)
         BigDecimal sumFixedIncome(Long userId, int month, int year);
 
+
+    @Query("""
+select 
+    t.category.id,
+    t.category.name,
+    coalesce(sum(t.convertedAmount),0),
+    count(t.id)
+from Transaction t
+where t.user.id = :userId
+and t.type = 'EXPENSE'
+and t.category is not null
+and t.month = :month
+and t.year = :year
+group by t.category.id, t.category.name
+order by sum(t.convertedAmount) desc
+""")
+    List<Object[]> expenseCategoryDistribution(
+            Long userId,
+            Integer month,
+            Integer year
+    );
+
+    @Query("""
+select coalesce(sum(t.convertedAmount),0)
+from Transaction t
+where t.user.id = :userId
+and t.type = 'EXPENSE'
+and t.month = :month
+and t.year = :year
+""")
+    BigDecimal totalExpenseForMonth(
+            Long userId,
+            Integer month,
+            Integer year
+    );
+
+
 }

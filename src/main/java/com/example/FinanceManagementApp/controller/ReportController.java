@@ -1,6 +1,6 @@
 package com.example.FinanceManagementApp.controller;
 
-import com.example.FinanceManagementApp.dto.response.report.CategoryDistributionResponse;
+import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
 import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import com.example.FinanceManagementApp.service.ReportService;
@@ -44,7 +44,7 @@ public class ReportController {
     }
 
     @GetMapping("/category")
-    public ResponseEntity<List<CategoryDistributionResponse>>category(
+    public ResponseEntity<ExpenseCategoryResponse>category(
             @AuthenticationPrincipal CurrentUserPrincipal p,
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year
@@ -55,7 +55,7 @@ public class ReportController {
             month = now.getMonthValue();
             year = now.getYear();
         }
-        return ResponseEntity.ok(reportService.categoryDistribution(p, month, year));
+        return ResponseEntity.ok(reportService.buildExpenseCategoryReport(p, month, year));
     }
 }
 
