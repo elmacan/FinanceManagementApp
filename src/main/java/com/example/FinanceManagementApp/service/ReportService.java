@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,11 +54,20 @@ public class ReportService {
             savingRate = net.multiply(BigDecimal.valueOf(100)).divide(income, 2, RoundingMode.HALF_UP);
         }
 
+        BigDecimal fixedIncome = transactionRepo.sumFixedIncome(user.getId(), month, year);
+
+        BigDecimal transactionIncome = income.subtract(fixedIncome);
+
+
+
         MonthlySummaryResponse r = new MonthlySummaryResponse();
 
         r.setMonth(month);
         r.setYear(year);
         r.setCurrency(p.getUser().getBaseCurrency());
+
+        r.setFixedMonthlyIncome(fixedIncome);
+        r.setTransactionIncome(transactionIncome);
 
         r.setTotalIncome(income);
         r.setTotalExpense(expense);

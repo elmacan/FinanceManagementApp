@@ -83,4 +83,15 @@ public interface TransactionRepo extends JpaRepository<Transaction, Long>{
     );
 
     boolean existsByUser_IdAndSourceTypeAndMonthAndYear(Long userId, TransactionSourceType sourceType,Integer month, Integer year);
+
+         @Query("""
+        select coalesce(sum(t.convertedAmount),0)
+        from Transaction t
+        where t.user.id = :userId
+        and t.sourceType = 'MONTHLY_FIXED_INCOME'
+        and t.month = :month
+        and t.year = :year
+        """)
+        BigDecimal sumFixedIncome(Long userId, int month, int year);
+
 }
