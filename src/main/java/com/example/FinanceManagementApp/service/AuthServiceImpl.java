@@ -18,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @RequiredArgsConstructor
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -34,6 +36,8 @@ public class AuthServiceImpl implements AuthService {
         private final RefreshTokenRepo refreshTokenRepo;
 
         private final SubscriptionServiceImpl subscriptionService;
+        private final MonthlyIncomeGeneratorService monthlyIncomeGeneratorService;
+
 
 
     @Override
@@ -69,9 +73,14 @@ public class AuthServiceImpl implements AuthService {
 
             //login sonrası catch-up
             subscriptionService.generateMissingSubscriptionTransactions(user);
+            //monthly-income catch-up
+            LocalDate now = LocalDate.now();
+
+            monthlyIncomeGeneratorService.ensureMonthlyIncome(user, now.getMonthValue(), now.getYear());
+        System.out.println("LOGIN VERIFY CALLED");
 
 
-            return new AuthResponse(accessToken,refreshToken);
+        return new AuthResponse(accessToken,refreshToken);
 
     }
 

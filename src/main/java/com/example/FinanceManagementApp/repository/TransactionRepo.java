@@ -66,4 +66,21 @@ public interface TransactionRepo extends JpaRepository<Transaction, Long>{
             Integer month,
             Integer year
     );
+
+
+    @Query("""
+    select t.type, coalesce(sum(t.convertedAmount),0)
+    from Transaction t
+    where t.user.id = :userId
+    and t.month = :month
+    and t.year = :year
+    group by t.type
+    """)
+    List<Object[]> sumIncomeExpenseByMonth(
+            Long userId,
+            Integer month,
+            Integer year
+    );
+
+    boolean existsByUser_IdAndSourceTypeAndMonthAndYear(Long userId, TransactionSourceType sourceType,Integer month, Integer year);
 }

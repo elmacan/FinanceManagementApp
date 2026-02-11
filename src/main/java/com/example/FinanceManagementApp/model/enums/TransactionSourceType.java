@@ -4,5 +4,6 @@ public enum TransactionSourceType {
     MANUAL, //income,expense
     BILL,
     PLANNED_EXPENSE,
-    SUBSCRIPTION
+    SUBSCRIPTION,
+    MONTHLY_FIXED_INCOME
 }
