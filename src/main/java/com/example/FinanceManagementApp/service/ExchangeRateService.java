@@ -43,9 +43,19 @@ public class ExchangeRateService {
             }
         }
 
-        if (missing) fetchFromTcmb(today,map);
+        if(!missing)return map;
 
-        return map;
+        try{
+            fetchFromTcmb(today,map);
+            return map;
+        }
+        catch(Exception e){
+            System.out.println("TCMB fetch failed → using last known rates");
+            return loadLatestFromDbOrFallback();
+        }
+
+
+
     }
 
     private void fetchFromTcmb(
@@ -75,4 +85,37 @@ public class ExchangeRateService {
             } catch(Exception ignored){}
         });
     }
+
+    private Map<CurrencyType, BigDecimal> loadLatestFromDbOrFallback() {
+
+        Map<CurrencyType, BigDecimal> map = new EnumMap<>(CurrencyType.class);
+
+        map.put(CurrencyType.TRY, BigDecimal.ONE);
+
+        for (CurrencyType c : CurrencyType.values()) {
+
+            if (c == CurrencyType.TRY) continue;
+
+            var latest = repo.findTopByCurrencyOrderByRateDateDesc(c);
+
+            if (latest.isPresent()) {
+                map.put(c, latest.get().getTryRate());
+            } else {
+                map.put(c, staticFallback(c));
+            }
+        }
+
+        return map;
+    }
+
+    private BigDecimal staticFallback(CurrencyType c) {
+        System.out.println("staticFallback for " + c);
+        return switch (c) {
+            case USD -> new BigDecimal("43");
+            case EUR -> new BigDecimal("51");
+            default -> BigDecimal.ONE;
+        };
+    }
+
+
 }

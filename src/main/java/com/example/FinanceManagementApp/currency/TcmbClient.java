@@ -1,7 +1,9 @@
 package com.example.FinanceManagementApp.currency;
 
+import com.example.FinanceManagementApp.exception.ApiException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,7 +21,7 @@ public class TcmbClient {
             String xml = restTemplate.getForObject(url, String.class);
             return xmlMapper.readValue(xml, TcmbResponse.class);
         } catch (Exception e) {
-            throw new RuntimeException("TCMB fetch error", e);
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "TCMB service unavailable");
         }
     }
 }
