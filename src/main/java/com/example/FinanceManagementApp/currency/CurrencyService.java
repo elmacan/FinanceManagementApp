@@ -1,6 +1,9 @@
-package com.example.FinanceManagementApp.service;
+package com.example.FinanceManagementApp.currency;
 
 import com.example.FinanceManagementApp.exception.ApiException;
+import com.example.FinanceManagementApp.service.ExchangeRateService;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -8,38 +11,36 @@ import org.springframework.stereotype.Service;
 import com.example.FinanceManagementApp.model.enums.CurrencyType;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.EnumMap;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @Service
 public class CurrencyService {
+    private final ExchangeRateService rateService;
+    private Map<CurrencyType, BigDecimal> rates;
 
 
-     //TRY base rate table (demo)
-
-    private static final Map<CurrencyType, BigDecimal> TRY_BASE_RATES = new EnumMap<>(CurrencyType.class);
-
-    static {
-        TRY_BASE_RATES.put(CurrencyType.TRY, BigDecimal.ONE);
-        TRY_BASE_RATES.put(CurrencyType.USD, new BigDecimal("43.00"));
-        TRY_BASE_RATES.put(CurrencyType.EUR, new BigDecimal("51.00"));
-        TRY_BASE_RATES.put(CurrencyType.GOLD_GRAM, new BigDecimal("7230.00"));
+    @PostConstruct
+    public void init() {
+        rates = rateService.getTodayRates();
     }
+    private void refreshIfNeeded() {
+        rates = rateService.getTodayRates();
+    }
+
 
 
     public BigDecimal getRate(CurrencyType from, CurrencyType to) {
 
         validate(from, to);
 
-        if (from == to) {
-            return BigDecimal.ONE;
-        }
+        if (from == to) {return BigDecimal.ONE;}
 
-        BigDecimal fromTry = TRY_BASE_RATES.get(from);
-        BigDecimal toTry = TRY_BASE_RATES.get(to);
+        BigDecimal fromTry = rates.get(from);
+        BigDecimal toTry = rates.get(to);
 
         if (fromTry == null || toTry == null) {
-            throw new IllegalArgumentException("Currency rate not found");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"Currency rate not found");
         }
 
         // cross-rate hesap
@@ -52,9 +53,9 @@ public class CurrencyService {
             throw new ApiException(HttpStatus.BAD_REQUEST,"Amount cannot be null");
         }
 
-        BigDecimal rate = getRate(from, to);
+        refreshIfNeeded();
 
-        return amount.multiply(rate).setScale(4, RoundingMode.HALF_UP);  //amount
+        return amount.multiply(getRate(from,to)).setScale(4, RoundingMode.HALF_UP);  //amount
     }
 
 

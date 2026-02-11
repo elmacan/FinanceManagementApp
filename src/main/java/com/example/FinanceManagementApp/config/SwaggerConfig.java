@@ -1,4 +1,4 @@
-package com.example.FinanceManagementApp;
+package com.example.FinanceManagementApp.config;
 
 import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;

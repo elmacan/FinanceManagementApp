@@ -1,6 +1,7 @@
 package com.example.FinanceManagementApp.service;
 //impl yapılcak
 
+import com.example.FinanceManagementApp.currency.CurrencyService;
 import com.example.FinanceManagementApp.dto.request.SavingEntryRequest;
 import com.example.FinanceManagementApp.dto.request.SavingGoalRequest;
 import com.example.FinanceManagementApp.dto.request.SavingGoalUpdateRequest;

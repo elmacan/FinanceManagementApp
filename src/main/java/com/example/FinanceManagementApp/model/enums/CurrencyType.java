@@ -3,7 +3,7 @@ package com.example.FinanceManagementApp.model.enums;
 public enum CurrencyType {
     TRY,
     USD,
-    EUR,
-    GOLD_GRAM
+    EUR
+   // GOLD_GRAM
 }
 

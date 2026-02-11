@@ -1,5 +1,6 @@
 package com.example.FinanceManagementApp.service;
 
+import com.example.FinanceManagementApp.currency.CurrencyService;
 import com.example.FinanceManagementApp.dto.request.PlannedExpenseRequest;
 import com.example.FinanceManagementApp.dto.response.PlannedExpenseResponse;
 import com.example.FinanceManagementApp.dto.response.TransactionResponse;
