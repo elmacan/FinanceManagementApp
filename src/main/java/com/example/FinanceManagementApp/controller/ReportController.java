@@ -2,6 +2,7 @@ package com.example.FinanceManagementApp.controller;
 
 import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
 import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
+import com.example.FinanceManagementApp.dto.response.report.ThreeMonthTrendResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import com.example.FinanceManagementApp.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,6 +57,11 @@ public class ReportController {
             year = now.getYear();
         }
         return ResponseEntity.ok(reportService.buildExpenseCategoryReport(p, month, year));
+    }
+
+    @GetMapping("/three-month-trend")
+    public ResponseEntity<ThreeMonthTrendResponse> trend(@AuthenticationPrincipal CurrentUserPrincipal p) {
+        return ResponseEntity.ok(reportService.threeMonthTrend(p));
     }
 }
 

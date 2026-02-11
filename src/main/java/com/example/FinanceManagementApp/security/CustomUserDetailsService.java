@@ -2,6 +2,7 @@ package com.example.FinanceManagementApp.security;
 
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.repository.UsersRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -9,13 +10,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-
+@RequiredArgsConstructor
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-
-    @Autowired
-    private UsersRepo userRepo;
+    private final UsersRepo userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String email)

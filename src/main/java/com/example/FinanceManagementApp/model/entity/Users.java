@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -30,6 +31,7 @@ public class Users {
 
     @Column(precision=19, scale=4)
     private BigDecimal monthlyIncome =BigDecimal.ZERO;   //default=0
+
 
     @Column(nullable=false)
     @Enumerated(EnumType.STRING)

@@ -130,5 +130,38 @@ and t.year = :year
             Integer year
     );
 
+    @Query("""
+select t.year, t.month, t.type,
+       coalesce(sum(t.convertedAmount),0)
+from Transaction t
+where t.user.id = :userId
+and (t.year*100 + t.month) between :startKey and :endKey
+group by t.year, t.month, t.type
+""")
+    List<Object[]> threeMonthTrendRaw(
+            Long userId,
+            Integer startKey,
+            Integer endKey
+    );
+
+
+    @Query("""
+select t.year, t.month,
+       t.category.id,
+       t.category.name,
+       coalesce(sum(t.convertedAmount),0)
+from Transaction t
+where t.user.id = :userId
+and t.type = 'EXPENSE'
+and (t.year*100 + t.month) between :startKey and :endKey
+group by t.year, t.month, t.category.id, t.category.name
+""")
+    List<Object[]> categoryExpenseFor3Months(
+            Long userId,
+            Integer startKey,
+            Integer endKey
+    );
+
+
 
 }

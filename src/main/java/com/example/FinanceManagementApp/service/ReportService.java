@@ -2,6 +2,7 @@ package com.example.FinanceManagementApp.service;
 
 import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
 import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
+import com.example.FinanceManagementApp.dto.response.report.ThreeMonthTrendResponse;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.TransactionRepo;
@@ -11,7 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -106,4 +110,147 @@ public class ReportService {
                 items
         );
     }
+
+    public ThreeMonthTrendResponse threeMonthTrend(CurrentUserPrincipal principal) {
+
+        Users user = principal.getUser();
+        LocalDate now = LocalDate.now();
+
+        LocalDate start = LocalDate.now().minusMonths(2);
+        int startKey = start.getYear() * 100 + start.getMonthValue();
+        int endKey= now.getYear() * 100 + now.getMonthValue();
+
+        var raw = transactionRepo.threeMonthTrendRaw(
+                user.getId(),
+                startKey,
+                endKey
+        );
+
+        List<ThreeMonthTrendResponse.MonthlyData> months = new ArrayList<>();
+
+        for (Object[] r : raw) {
+
+            int year = (Integer) r[0];
+            int month = (Integer) r[1];
+            TransactionType type = (TransactionType) r[2];
+            BigDecimal amount = (BigDecimal) r[3];
+
+            var m = findOrCreate(months, year, month);
+
+            if (type == TransactionType.INCOME)
+                m.setIncome(amount);
+            else
+                m.setExpense(amount);
+        }
+
+
+        months.forEach(m ->
+                m.setNetBalance(
+                        m.getIncome().subtract(m.getExpense())
+                )
+        );
+
+
+        var catRaw = transactionRepo.categoryExpenseFor3Months(
+                user.getId(),
+                startKey,
+                endKey
+        );
+
+        Map<String, ThreeMonthTrendResponse.TopCategory> topMap = new HashMap<>();
+
+        for (Object[] r : catRaw) {
+
+            int year = (Integer) r[0];
+            int month = (Integer) r[1];
+            Long id = (Long) r[2];
+            String name = (String) r[3];
+            BigDecimal amount = (BigDecimal) r[4];
+
+            String key = year + "-" + month;
+
+            var current = topMap.get(key);
+
+            if (current == null || amount.compareTo(current.getAmount()) > 0) {
+                topMap.put(key,
+                        new ThreeMonthTrendResponse.TopCategory(
+                                id, name, amount));
+            }
+        }
+
+        months.forEach(m ->
+                m.setTopExpenseCategory(
+                        topMap.get(m.getYear() + "-" + m.getMonth())
+                )
+        );
+
+
+        BigDecimal avgIncome = avg(months.stream().map(ThreeMonthTrendResponse.MonthlyData::getIncome).toList());
+
+        BigDecimal avgExpense =
+                avg(months.stream().map(ThreeMonthTrendResponse.MonthlyData::getExpense).toList());
+
+        BigDecimal avgNet =
+                avg(months.stream().map(ThreeMonthTrendResponse.MonthlyData::getNetBalance).toList());
+
+        return new ThreeMonthTrendResponse(
+                user.getBaseCurrency(),
+                months.get(0).getMonthName() + " - " +
+                        months.get(months.size() - 1).getMonthName(),
+                months,
+                avgIncome,
+                avgExpense,
+                avgNet
+        );
+    }
+
+    private BigDecimal avg(List<BigDecimal> list) {
+
+        if (list.isEmpty()) return BigDecimal.ZERO;
+
+        BigDecimal sum = BigDecimal.ZERO;
+
+        for (BigDecimal b : list)
+            sum = sum.add(b);
+
+        return sum.divide(
+                BigDecimal.valueOf(list.size()),
+                2,
+                RoundingMode.HALF_UP
+        );
+    }
+
+    private String monthName(int m) {
+        return Month.of(m).getDisplayName(
+                        TextStyle.FULL,
+                        new Locale("tr")
+                );
+    }
+
+    private ThreeMonthTrendResponse.MonthlyData findOrCreate(
+            List<ThreeMonthTrendResponse.MonthlyData> list,
+            int year,
+            int month
+    ) {
+        for (var m : list) {
+            if (m.getYear()==year && m.getMonth()==month)
+                return m;
+        }
+
+        var m = new ThreeMonthTrendResponse.MonthlyData(
+                month,
+                year,
+                monthName(month)+" "+year,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                null
+        );
+
+        list.add(m);
+        return m;
+    }
+
+
+
 }
