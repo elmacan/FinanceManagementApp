@@ -6,6 +6,7 @@ import com.example.FinanceManagementApp.dto.request.BudgetRequest;
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import com.example.FinanceManagementApp.service.BudgetServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,9 @@ public class BudgetController {
     private final BudgetServiceImpl budgetService;
 
 
-
+    @Operation(
+            description = "category_id = null -> Total Budget , =! ise Category Budget "
+    )
     @PostMapping
     public ResponseEntity<BudgetResponse> create(
             @Valid @RequestBody BudgetRequest dto,

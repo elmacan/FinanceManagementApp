@@ -45,7 +45,17 @@ public class BudgetServiceImpl implements BudgetService {
         //nullsa total budget
         Category category=null;
 
-        if (dto.getCategoryId() != null) {
+        if (dto.getCategoryId() == null) {
+
+            if (budgetRepo.existsByUserAndCategoryIsNullAndMonthAndYear(
+                    user, dto.getMonth(), dto.getYear())) {
+
+                throw new ApiException(
+                        HttpStatus.CONFLICT,
+                        "Total budget already exists for this month/year"
+                );
+            }
+        }else{
 
             category = categoryRepo
                     .findByIdAndUser_Id(dto.getCategoryId(), user.getId())
@@ -62,7 +72,7 @@ public class BudgetServiceImpl implements BudgetService {
                     user, category, dto.getMonth(), dto.getYear())) {
                 throw new ApiException(
                         HttpStatus.CONFLICT,
-                        "Budget already exists");
+                        "Budget already exists for this category/month/year");
             }
         }
 

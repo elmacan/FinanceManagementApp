@@ -23,4 +23,7 @@ public interface BudgetRepo extends JpaRepository<Budget, Long> {
     Optional<Budget> findByUser_IdAndCategory_IdAndMonthAndYear(Long userId, Long categoryId, Integer month, Integer year);
 
     Optional<Budget> findByUser_IdAndCategoryIsNullAndMonthAndYear(Long userId, Integer month, Integer year);
+
+    boolean existsByUserAndCategoryIsNullAndMonthAndYear(Users user, Integer month, Integer year);
+
 }
