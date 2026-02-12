@@ -32,5 +32,12 @@ public interface SavingEntryRepo extends JpaRepository<SavingEntry,Long> {
     long countByGoal_IdAndGoal_User_Id(Long goalId, Long userId);
 
 
+    List<SavingEntry> findByGoal_IdOrderByDateAsc(Long goalId);
 
+    @Query("""
+select coalesce(sum(e.convertedAmount),0)
+from SavingEntry e
+where e.goal.id = :goalId
+""")
+    BigDecimal sumConvertedForGoal(Long goalId);
 }

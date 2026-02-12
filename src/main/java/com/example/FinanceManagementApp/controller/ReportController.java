@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -87,6 +84,18 @@ public class ReportController {
     ) {
         return ResponseEntity.ok(reportService.buildSubscriptionReport(p));
     }
+    @Operation(
+            summary = "Spesifik Birikim Hedefi Raporu"
+    )
+    @GetMapping("/saving-goal")
+    public ResponseEntity<SavingGoalReportResponse> savingGoalReport(
+            @AuthenticationPrincipal CurrentUserPrincipal p,
+            @RequestParam Long goalId
+    ) {
+        return ResponseEntity.ok(reportService.buildSavingGoalReport(p,goalId));
+    }
+
+
 
 
     //default olarak şu ankileri çekiyor

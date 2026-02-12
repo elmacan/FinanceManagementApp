@@ -2,17 +2,15 @@ package com.example.FinanceManagementApp.service;
 
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
 import com.example.FinanceManagementApp.dto.response.report.*;
-import com.example.FinanceManagementApp.model.entity.Bill;
-import com.example.FinanceManagementApp.model.entity.Subscription;
-import com.example.FinanceManagementApp.model.entity.Users;
+import com.example.FinanceManagementApp.exception.ApiException;
+import com.example.FinanceManagementApp.model.entity.*;
 import com.example.FinanceManagementApp.model.enums.BillStatus;
 import com.example.FinanceManagementApp.model.enums.TransactionSourceType;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
-import com.example.FinanceManagementApp.repository.BillRepo;
-import com.example.FinanceManagementApp.repository.SubscriptionRepo;
-import com.example.FinanceManagementApp.repository.TransactionRepo;
+import com.example.FinanceManagementApp.repository.*;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,6 +18,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -30,6 +29,8 @@ public class ReportService {
     private final BudgetService budgetService;
     private final BillRepo billRepo;
     private final SubscriptionRepo subscriptionRepo;
+    private final SavingGoalRepo savingGoalRepo;
+    private final SavingEntryRepo savingEntryRepo;
 
 
 
@@ -389,5 +390,85 @@ public class ReportService {
         r.setSubscriptions(items);
 
         return r;
+    }
+
+    public SavingGoalReportResponse buildSavingGoalReport(CurrentUserPrincipal principal,Long goalId) {
+        Users user = principal.getUser();
+
+        SavingGoal goal = savingGoalRepo
+                .findByIdAndUser_Id(goalId, user.getId())
+                .orElseThrow(() ->
+                        new ApiException(HttpStatus.NOT_FOUND, "Saving goal not found"));
+
+        List<SavingEntry> entries = savingEntryRepo.findByGoal_IdOrderByDateAsc(goalId);
+
+
+        BigDecimal savedAmount = savingEntryRepo.sumConvertedForGoal(goalId);
+
+        if (savedAmount == null)
+            savedAmount = BigDecimal.ZERO;
+
+
+        BigDecimal remaining = goal.getTargetAmount().subtract(savedAmount);
+
+        if (remaining.signum() < 0)
+            remaining = BigDecimal.ZERO;
+
+        int percent = 0;
+
+        if (goal.getTargetAmount().signum() > 0) {
+            percent = savedAmount
+                    .multiply(BigDecimal.valueOf(100))
+                    .divide(goal.getTargetAmount(), 0, RoundingMode.HALF_UP)
+                    .intValue();
+        }
+
+
+        Integer daysUntil = null;
+
+        if (goal.getTargetDate() != null) {
+            daysUntil = (int) ChronoUnit.DAYS.between(
+                    LocalDate.now(),
+                    goal.getTargetDate()
+            );
+        }
+
+
+        List<SavingGoalReportResponse.EntryItem> entryItems = new ArrayList<>();
+
+        for (SavingEntry e : entries) {
+            entryItems.add(
+                    new SavingGoalReportResponse.EntryItem(
+                            e.getId(),
+                            e.getOriginalAmount(),
+                            e.getOriginalCurrency(),
+                            e.getConvertedAmount(),
+                            e.getGoalCurrency(),
+                            e.getRate(),
+                            e.getDate()
+                    )
+            );
+        }
+
+        return new SavingGoalReportResponse(
+                goal.getId(),
+                goal.getTitle(),
+                goal.getTargetDate(),
+                daysUntil,
+                goal.getCompleted(),
+
+                goal.getCurrency(),
+
+                goal.getTargetAmount(),
+                savedAmount,
+                remaining,
+
+                percent,
+                entryItems.size(),
+
+                entryItems
+        );
+
+
     }
 }
