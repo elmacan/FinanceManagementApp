@@ -1,15 +1,15 @@
 package com.example.FinanceManagementApp.service;
 
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
-import com.example.FinanceManagementApp.dto.response.report.BillReportResponse;
-import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
-import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
-import com.example.FinanceManagementApp.dto.response.report.ThreeMonthTrendResponse;
+import com.example.FinanceManagementApp.dto.response.report.*;
 import com.example.FinanceManagementApp.model.entity.Bill;
+import com.example.FinanceManagementApp.model.entity.Subscription;
 import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.model.enums.BillStatus;
+import com.example.FinanceManagementApp.model.enums.TransactionSourceType;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.BillRepo;
+import com.example.FinanceManagementApp.repository.SubscriptionRepo;
 import com.example.FinanceManagementApp.repository.TransactionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +29,7 @@ public class ReportService {
     private final MonthlyIncomeGeneratorService incomeGenerator;
     private final BudgetService budgetService;
     private final BillRepo billRepo;
+    private final SubscriptionRepo subscriptionRepo;
 
 
 
@@ -333,4 +334,60 @@ public class ReportService {
 
     }
 
+
+    public SubscriptionReportResponse buildSubscriptionReport(CurrentUserPrincipal p) {
+        Users user = p.getUser();
+
+        int month = LocalDate.now().getMonthValue();
+        int year  = LocalDate.now().getYear();
+
+        List<Subscription> subs = subscriptionRepo.findByUser_Id(user.getId());
+
+        List<SubscriptionReportResponse.Item> items = new ArrayList<>();
+
+        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal notChargedTotal = BigDecimal.ZERO;
+
+
+
+        for (Subscription s : subs) {
+
+            boolean charged = transactionRepo
+                            .existsByUser_IdAndSourceTypeAndSourceIdAndMonthAndYear(
+                                    user.getId(),
+                                    TransactionSourceType.SUBSCRIPTION,
+                                    s.getId(),
+                                    month,
+                                    year
+                            );
+
+            if (Boolean.TRUE.equals(s.getActive())) {
+                total = total.add(s.getMonthlyAmount());
+                if (!charged) {
+                    notChargedTotal =
+                            notChargedTotal.add(s.getMonthlyAmount());
+                }
+            }
+
+            items.add(
+                    new SubscriptionReportResponse.Item(
+                            s.getId(),
+                            s.getName(),
+                            s.getCategory().getId(),
+                            s.getCategory().getName(),
+                            s.getMonthlyAmount(),
+                            s.getBillingDay(),
+                            s.getActive(),
+                            charged
+                    )
+            );
+        }
+
+        SubscriptionReportResponse r = new SubscriptionReportResponse();
+        r.setMonthlyTotalCost(total);
+        r.setNotChargedYetCost(notChargedTotal);
+        r.setSubscriptions(items);
+
+        return r;
+    }
 }

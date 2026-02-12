@@ -1,10 +1,7 @@
 package com.example.FinanceManagementApp.controller;
 
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
-import com.example.FinanceManagementApp.dto.response.report.BillReportResponse;
-import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
-import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
-import com.example.FinanceManagementApp.dto.response.report.ThreeMonthTrendResponse;
+import com.example.FinanceManagementApp.dto.response.report.*;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import com.example.FinanceManagementApp.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,6 +80,13 @@ public class ReportController {
         return ResponseEntity.ok(reportService.buildBillReport(p));
     }
 
+    @Operation(description = "Tüm Aboneliker ve Abonelik Aylık Maliyet ve Tahsilat Durumu")
+    @GetMapping("/subscriptions")
+    public ResponseEntity<SubscriptionReportResponse> subscriptionReport(
+            @AuthenticationPrincipal CurrentUserPrincipal p
+    ) {
+        return ResponseEntity.ok(reportService.buildSubscriptionReport(p));
+    }
 
 
     //default olarak şu ankileri çekiyor
