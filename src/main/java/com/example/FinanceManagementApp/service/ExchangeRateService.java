@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -18,6 +19,9 @@ public class ExchangeRateService {
 
     private final TcmbClient tcmbClient;
     private final ExchangeRateRepo repo;
+    private static final LocalTime TCMB_UPDATE_TIME = LocalTime.of(15, 30);
+    //sitede kur bu saatte güncelleniyor her gün
+
 
     public Map<CurrencyType, BigDecimal> getTodayRates() {
 
@@ -43,7 +47,10 @@ public class ExchangeRateService {
             }
         }
 
-        if(!missing)return map;
+        if (!missing && !shouldRefreshTodayRates(today)) {
+            return map;
+        }
+
 
         try{
             fetchFromTcmb(today,map);
@@ -116,6 +123,12 @@ public class ExchangeRateService {
             default -> BigDecimal.ONE;
         };
     }
+
+
+    private boolean shouldRefreshTodayRates(LocalDate today) {
+        return LocalTime.now().isAfter(TCMB_UPDATE_TIME);
+    }
+
 
 
 }

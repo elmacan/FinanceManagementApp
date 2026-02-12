@@ -14,12 +14,12 @@ public class SubscriptionReportResponse {
     private BigDecimal monthlyTotalCost;
     private BigDecimal notChargedYetCost;
 
-    private List<Item> subscriptions;
+    private List<SubscriptionItem> subscriptions;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Item {
+    public static class SubscriptionItem {
 
         private Long subscriptionId;
         private String name;

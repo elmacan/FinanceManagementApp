@@ -16,7 +16,7 @@ public class ThreeMonthTrendResponse {
     private CurrencyType currency;
     private String period;
 
-    private List<MonthlyData> monthlyData;
+    private List<MonthlyDataItem> monthlyData;
 
     private BigDecimal averageMonthlyIncome;
     private BigDecimal averageMonthlyExpense;
@@ -25,7 +25,7 @@ public class ThreeMonthTrendResponse {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class MonthlyData {
+    public static class MonthlyDataItem {
         private Integer month;
         private Integer year;
         private String monthName;

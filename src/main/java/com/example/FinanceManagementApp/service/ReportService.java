@@ -135,7 +135,7 @@ public class ReportService {
                 endKey
         );
 
-        List<ThreeMonthTrendResponse.MonthlyData> months = new ArrayList<>();
+        List<ThreeMonthTrendResponse.MonthlyDataItem> months = new ArrayList<>();
 
         for (Object[] r : raw) {
 
@@ -194,13 +194,13 @@ public class ReportService {
         );
 
 
-        BigDecimal avgIncome = avg(months.stream().map(ThreeMonthTrendResponse.MonthlyData::getIncome).toList());
+        BigDecimal avgIncome = avg(months.stream().map(ThreeMonthTrendResponse.MonthlyDataItem::getIncome).toList());
 
         BigDecimal avgExpense =
-                avg(months.stream().map(ThreeMonthTrendResponse.MonthlyData::getExpense).toList());
+                avg(months.stream().map(ThreeMonthTrendResponse.MonthlyDataItem::getExpense).toList());
 
         BigDecimal avgNet =
-                avg(months.stream().map(ThreeMonthTrendResponse.MonthlyData::getNetBalance).toList());
+                avg(months.stream().map(ThreeMonthTrendResponse.MonthlyDataItem::getNetBalance).toList());
 
         return new ThreeMonthTrendResponse(
                 user.getBaseCurrency(),
@@ -236,8 +236,8 @@ public class ReportService {
                 );
     }
 
-    private ThreeMonthTrendResponse.MonthlyData findOrCreate(
-            List<ThreeMonthTrendResponse.MonthlyData> list,
+    private ThreeMonthTrendResponse.MonthlyDataItem findOrCreate(
+            List<ThreeMonthTrendResponse.MonthlyDataItem> list,
             int year,
             int month
     ) {
@@ -246,7 +246,7 @@ public class ReportService {
                 return m;
         }
 
-        var m = new ThreeMonthTrendResponse.MonthlyData(
+        var m = new ThreeMonthTrendResponse.MonthlyDataItem(
                 month,
                 year,
                 monthName(month)+" "+year,
@@ -344,7 +344,7 @@ public class ReportService {
 
         List<Subscription> subs = subscriptionRepo.findByUser_Id(user.getId());
 
-        List<SubscriptionReportResponse.Item> items = new ArrayList<>();
+        List<SubscriptionReportResponse.SubscriptionItem> items = new ArrayList<>();
 
         BigDecimal total = BigDecimal.ZERO;
         BigDecimal notChargedTotal = BigDecimal.ZERO;
@@ -371,7 +371,7 @@ public class ReportService {
             }
 
             items.add(
-                    new SubscriptionReportResponse.Item(
+                    new SubscriptionReportResponse.SubscriptionItem(
                             s.getId(),
                             s.getName(),
                             s.getCategory().getId(),
