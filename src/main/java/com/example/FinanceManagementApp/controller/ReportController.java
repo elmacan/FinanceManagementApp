@@ -37,7 +37,7 @@ public class ReportController {
     }
 
     @Operation(
-            summary = "Kategori bazlı harcama dağılımı",
+            summary = "Kategori Bazlı Harcama Dağılımı",
             description = "Ay veya yıl girilmezse, otomatik şu ankileri alır"
     )
     @GetMapping("/category")
@@ -57,6 +57,7 @@ public class ReportController {
     }
 
     @Operation(
+            summary = "Kategori ve Toplam Bütçe için Limit ve Harcama Durumu",
             description = "Ay veya yıl girilmezse, otomatik şu ankileri alır"
     )
     @GetMapping("/budget")
@@ -69,7 +70,7 @@ public class ReportController {
         return ResponseEntity.ok(reportService.buildBudgetReport(my[0], my[1], p));
     }
 
-
+    @Operation(summary = "Tüm Faturalar ve Ödeme Durumları")
     @GetMapping("/bills")
     public ResponseEntity<BillReportResponse> billReport(
             @AuthenticationPrincipal CurrentUserPrincipal p
@@ -77,24 +78,34 @@ public class ReportController {
         return ResponseEntity.ok(reportService.buildBillReport(p));
     }
 
-    @Operation(description = "Tüm Aboneliker ve Abonelik Aylık Maliyet ve Tahsilat Durumu")
+    @Operation(summary = "Tüm Aboneliker ve Abonelik Aylık Maliyet ve Tahsilat Durumu")
     @GetMapping("/subscriptions")
     public ResponseEntity<SubscriptionReportResponse> subscriptionReport(
             @AuthenticationPrincipal CurrentUserPrincipal p
     ) {
         return ResponseEntity.ok(reportService.buildSubscriptionReport(p));
     }
+
     @Operation(
             summary = "Spesifik Birikim Hedefi Raporu"
     )
     @GetMapping("/saving-goal")
-    public ResponseEntity<SavingGoalReportResponse> savingGoalReport(
+    public ResponseEntity<SavingGoalWithEntityResponse> savingGoalReport(
             @AuthenticationPrincipal CurrentUserPrincipal p,
             @RequestParam Long goalId
     ) {
         return ResponseEntity.ok(reportService.buildSavingGoalReport(p,goalId));
     }
 
+    @Operation(
+            summary = "Tüm Birikim Hedefleri ve Durumları"
+    )
+    @GetMapping("/all-saving-goals")
+    public ResponseEntity<List<SavingGoalSummaryResponse>> allSavingGoalsReport(
+            @AuthenticationPrincipal CurrentUserPrincipal p
+    ) {
+        return ResponseEntity.ok(reportService.allSavingGoalsReport(p));
+    }
 
 
 
@@ -107,6 +118,7 @@ public class ReportController {
 
         return new int[]{month, year};
     }
+
 
 
 

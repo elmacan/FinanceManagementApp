@@ -9,6 +9,7 @@ import com.example.FinanceManagementApp.model.enums.TransactionSourceType;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.*;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -129,7 +130,7 @@ public class ReportService {
         int startKey = start.getYear() * 100 + start.getMonthValue();
         int endKey= now.getYear() * 100 + now.getMonthValue();
 
-        var raw = transactionRepo.threeMonthTrendRaw(
+        List<Object[]> raw = transactionRepo.threeMonthTrendRaw(
                 user.getId(),
                 startKey,
                 endKey
@@ -144,7 +145,7 @@ public class ReportService {
             TransactionType type = (TransactionType) r[2];
             BigDecimal amount = (BigDecimal) r[3];
 
-            var m = findOrCreate(months, year, month);
+            ThreeMonthTrendResponse.MonthlyDataItem m = findOrCreate(months, year, month);
 
             if (type == TransactionType.INCOME)
                 m.setIncome(amount);
@@ -160,7 +161,7 @@ public class ReportService {
         );
 
 
-        var catRaw = transactionRepo.categoryExpenseFor3Months(
+        List<Object[]> catRaw  = transactionRepo.categoryExpenseFor3Months(
                 user.getId(),
                 startKey,
                 endKey
@@ -178,7 +179,7 @@ public class ReportService {
 
             String key = year + "-" + month;
 
-            var current = topMap.get(key);
+            ThreeMonthTrendResponse.TopCategory current = topMap.get(key);
 
             if (current == null || amount.compareTo(current.getAmount()) > 0) {
                 topMap.put(key,
@@ -201,6 +202,17 @@ public class ReportService {
 
         BigDecimal avgNet =
                 avg(months.stream().map(ThreeMonthTrendResponse.MonthlyDataItem::getNetBalance).toList());
+
+        if (months.isEmpty()) {
+            return new ThreeMonthTrendResponse(
+                    user.getBaseCurrency(),
+                    "No Data",
+                    List.of(),
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO
+            );
+        }
 
         return new ThreeMonthTrendResponse(
                 user.getBaseCurrency(),
@@ -241,12 +253,12 @@ public class ReportService {
             int year,
             int month
     ) {
-        for (var m : list) {
+        for (ThreeMonthTrendResponse.MonthlyDataItem m : list) {
             if (m.getYear()==year && m.getMonth()==month)
                 return m;
         }
 
-        var m = new ThreeMonthTrendResponse.MonthlyDataItem(
+        ThreeMonthTrendResponse.MonthlyDataItem m  = new ThreeMonthTrendResponse.MonthlyDataItem(
                 month,
                 year,
                 monthName(month)+" "+year,
@@ -392,7 +404,7 @@ public class ReportService {
         return r;
     }
 
-    public SavingGoalReportResponse buildSavingGoalReport(CurrentUserPrincipal principal,Long goalId) {
+    public SavingGoalWithEntityResponse buildSavingGoalReport(CurrentUserPrincipal principal, Long goalId) {
         Users user = principal.getUser();
 
         SavingGoal goal = savingGoalRepo
@@ -400,45 +412,26 @@ public class ReportService {
                 .orElseThrow(() ->
                         new ApiException(HttpStatus.NOT_FOUND, "Saving goal not found"));
 
-        List<SavingEntry> entries = savingEntryRepo.findByGoal_IdOrderByDateAsc(goalId);
+        List<SavingEntry> entries = savingEntryRepo.findByGoal_IdAndGoal_User_IdOrderByDateAsc(goalId, principal.getId());
 
 
-        BigDecimal savedAmount = savingEntryRepo.sumConvertedForGoal(goalId);
-
-        if (savedAmount == null)
-            savedAmount = BigDecimal.ZERO;
-
-
-        BigDecimal remaining = goal.getTargetAmount().subtract(savedAmount);
-
-        if (remaining.signum() < 0)
-            remaining = BigDecimal.ZERO;
+        BigDecimal[] savedAndRemaining=savingGoalStats(goal, principal.getId());
 
         int percent = 0;
 
         if (goal.getTargetAmount().signum() > 0) {
-            percent = savedAmount
+            percent = savedAndRemaining[0]
                     .multiply(BigDecimal.valueOf(100))
                     .divide(goal.getTargetAmount(), 0, RoundingMode.HALF_UP)
                     .intValue();
         }
 
 
-        Integer daysUntil = null;
-
-        if (goal.getTargetDate() != null) {
-            daysUntil = (int) ChronoUnit.DAYS.between(
-                    LocalDate.now(),
-                    goal.getTargetDate()
-            );
-        }
-
-
-        List<SavingGoalReportResponse.EntryItem> entryItems = new ArrayList<>();
+        List<SavingGoalWithEntityResponse.EntryItem> entryItems = new ArrayList<>();
 
         for (SavingEntry e : entries) {
             entryItems.add(
-                    new SavingGoalReportResponse.EntryItem(
+                    new SavingGoalWithEntityResponse.EntryItem(
                             e.getId(),
                             e.getOriginalAmount(),
                             e.getOriginalCurrency(),
@@ -450,25 +443,98 @@ public class ReportService {
             );
         }
 
-        return new SavingGoalReportResponse(
+        return new SavingGoalWithEntityResponse(
                 goal.getId(),
                 goal.getTitle(),
                 goal.getTargetDate(),
-                daysUntil,
+                countDaysUntil(goal),
                 goal.getCompleted(),
-
                 goal.getCurrency(),
-
                 goal.getTargetAmount(),
-                savedAmount,
-                remaining,
-
+                savedAndRemaining[0],
+                savedAndRemaining[1],
                 percent,
                 entryItems.size(),
-
                 entryItems
         );
 
 
     }
+
+
+    public List<SavingGoalSummaryResponse> allSavingGoalsReport(CurrentUserPrincipal principal) {
+        Users user = principal.getUser();
+        Long userId = principal.getId();
+
+        List<SavingGoal> goals = savingGoalRepo.findByUser_Id(userId);
+
+        List<SavingGoalSummaryResponse> results = new ArrayList<>();
+
+        for (SavingGoal goal : goals) {
+
+            BigDecimal[] savedAndRemaining=savingGoalStats(goal,userId);
+
+            int percent = 0;
+
+            if (goal.getTargetAmount().signum() > 0) {
+                percent = savedAndRemaining[0]
+                        .multiply(BigDecimal.valueOf(100))
+                        .divide(goal.getTargetAmount(), 0, RoundingMode.HALF_UP)
+                        .intValue();
+            }
+
+            Integer entryCount = savingEntryRepo.countByGoal_IdAndGoal_User_Id(goal.getId(), userId);
+
+            results.add(
+                    new SavingGoalSummaryResponse(
+                            goal.getId(),
+                            goal.getTitle(),
+                            goal.getTargetDate(),
+                            countDaysUntil(goal),
+                            goal.getCompleted(),
+                            goal.getCurrency(),
+                            goal.getTargetAmount(),
+                            savedAndRemaining[0],
+                            savedAndRemaining[1],
+                            percent,
+                            entryCount
+                    )
+            );
+        }
+
+        return results;
+
+
+
+
+    }
+
+   private BigDecimal[] savingGoalStats (SavingGoal goal,Long userId) {
+            //[0] -> savedAmount
+            //[1] -> remaining
+
+       BigDecimal savedAmount = savingEntryRepo.sumProgress(goal.getId(),userId);
+       if (savedAmount == null) savedAmount = BigDecimal.ZERO;
+
+       BigDecimal remaining = goal.getTargetAmount().subtract(savedAmount);
+
+       if (remaining.signum() < 0) remaining = BigDecimal.ZERO;
+
+       return new BigDecimal[]{savedAmount, remaining};
+
+   }
+
+   private Integer countDaysUntil(SavingGoal goal) {
+       Integer daysUntil = null;
+
+       if (goal.getTargetDate() != null) {
+           daysUntil = (int) ChronoUnit.DAYS.between(
+                   LocalDate.now(),
+                   goal.getTargetDate()
+           );
+       }
+       return daysUntil;
+   }
+
+
 }
