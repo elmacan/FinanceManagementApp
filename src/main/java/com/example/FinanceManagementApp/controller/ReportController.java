@@ -1,6 +1,7 @@
 package com.example.FinanceManagementApp.controller;
 
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
+import com.example.FinanceManagementApp.dto.response.report.BillReportResponse;
 import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
 import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
 import com.example.FinanceManagementApp.dto.response.report.ThreeMonthTrendResponse;
@@ -71,8 +72,18 @@ public class ReportController {
             @RequestParam(required = false) Integer year
     ) {
         int[] my=resolveMonthYear(month, year);
-        return ResponseEntity.ok(reportService.budgetReport(my[0], my[1], p));
+        return ResponseEntity.ok(reportService.buildBudgetReport(my[0], my[1], p));
     }
+
+
+    @GetMapping("/bills")
+    public ResponseEntity<BillReportResponse> billReport(
+            @AuthenticationPrincipal CurrentUserPrincipal p
+    ) {
+        return ResponseEntity.ok(reportService.buildBillReport(p));
+    }
+
+
 
     //default olarak şu ankileri çekiyor
     private int[] resolveMonthYear(Integer month, Integer year) {
@@ -83,6 +94,7 @@ public class ReportController {
 
         return new int[]{month, year};
     }
+
 
 
 

@@ -1,11 +1,15 @@
 package com.example.FinanceManagementApp.service;
 
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
+import com.example.FinanceManagementApp.dto.response.report.BillReportResponse;
 import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
 import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
 import com.example.FinanceManagementApp.dto.response.report.ThreeMonthTrendResponse;
+import com.example.FinanceManagementApp.model.entity.Bill;
 import com.example.FinanceManagementApp.model.entity.Users;
+import com.example.FinanceManagementApp.model.enums.BillStatus;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
+import com.example.FinanceManagementApp.repository.BillRepo;
 import com.example.FinanceManagementApp.repository.TransactionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,7 @@ public class ReportService {
     private final TransactionRepo transactionRepo;
     private final MonthlyIncomeGeneratorService incomeGenerator;
     private final BudgetService budgetService;
+    private final BillRepo billRepo;
 
 
 
@@ -254,7 +259,78 @@ public class ReportService {
     }
 
 
-    public List<BudgetResponse> budgetReport(Integer month, Integer year, CurrentUserPrincipal p) {
+    public List<BudgetResponse> buildBudgetReport(Integer month, Integer year, CurrentUserPrincipal p) {
         return budgetService.list(month, year, p);
     }
+
+    public BillReportResponse buildBillReport(CurrentUserPrincipal p) {
+        Long userId = p.getId();
+
+        List<Bill> all = billRepo.findByUser_Id(userId);
+
+        int paid = 0;
+        int unpaid = 0;
+        int overdue = 0;
+
+        List<BillReportResponse.BillItem> unpaidList = new ArrayList<>();
+        List<BillReportResponse.BillItem> paidList = new ArrayList<>();
+        List<BillReportResponse.BillItem> overDueList = new ArrayList<>();
+
+
+        LocalDate today = LocalDate.now();
+
+        for (Bill b : all) {
+
+            boolean isOverdue = b.getStatus() != BillStatus.PAID && b.getDueDate() != null && b.getDueDate().isBefore(today);
+
+            if (b.getStatus() == BillStatus.PAID) {
+                paid++;
+                paidList.add(new BillReportResponse.BillItem(
+                        b.getId(),
+                        b.getName(),
+                        b.getAmount(),
+                        b.getDueDate(),
+                        b.getStatus()
+                ));
+            } else if (isOverdue) {
+                overdue++;
+                overDueList.add(new BillReportResponse.BillItem(
+                        b.getId(),
+                        b.getName(),
+                        b.getAmount(),
+                        b.getDueDate(),
+                        BillStatus.OVERDUE
+                ));
+
+            } else {
+                unpaid++;
+                unpaidList.add(new BillReportResponse.BillItem(
+                        b.getId(),
+                        b.getName(),
+                        b.getAmount(),
+                        b.getDueDate(),
+                        b.getStatus()
+                ));
+            }
+
+
+        }
+
+            BigDecimal totalUnpaid = billRepo.totalUnpaidAmount(userId);
+
+            BillReportResponse r = new BillReportResponse();
+
+            r.setTotalBills(all.size());
+            r.setPaidCount(paid);
+            r.setUnpaidCount(unpaid);
+            r.setOverdueCount(overdue);
+            r.setTotalUnpaidAmount(totalUnpaid);
+            r.setUnpaidBills(unpaidList);
+            r.setOverDueBills(overDueList);
+            r.setPaidBills(paidList);
+
+            return r;
+
+    }
+
 }
