@@ -1,5 +1,6 @@
 package com.example.FinanceManagementApp.controller;
 
+import com.example.FinanceManagementApp.dto.response.BudgetResponse;
 import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
 import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
 import com.example.FinanceManagementApp.dto.response.report.ThreeMonthTrendResponse;
@@ -24,6 +25,7 @@ public class ReportController {
 
     private final ReportService reportService;
 
+
     @GetMapping("/monthly-summary")
     @Operation(
             summary = "Aylık Gelir/Gider Raporu",
@@ -34,16 +36,15 @@ public class ReportController {
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year
     ) {
-        //default oalrak bu ay
-        if (month == null || year == null) {
-            LocalDate now = LocalDate.now();
-            month = now.getMonthValue();
-            year = now.getYear();
-        }
 
-        return ResponseEntity.ok(reportService.monthlySummary(p, month, year));
+        int[] my=resolveMonthYear(month, year);
+        return ResponseEntity.ok(reportService.monthlySummary(p, my[0], my[1]));
     }
 
+    @Operation(
+            summary = "Kategori bazlı harcama dağılımı",
+            description = "Ay veya yıl girilmezse, otomatik şu ankileri alır"
+    )
     @GetMapping("/category")
     public ResponseEntity<ExpenseCategoryResponse>category(
             @AuthenticationPrincipal CurrentUserPrincipal p,
@@ -51,18 +52,40 @@ public class ReportController {
             @RequestParam(required = false) Integer year
     ) {
 
-        if (month == null || year == null) {
-            LocalDate now = LocalDate.now();
-            month = now.getMonthValue();
-            year = now.getYear();
-        }
-        return ResponseEntity.ok(reportService.buildExpenseCategoryReport(p, month, year));
+        int[] my=resolveMonthYear(month, year);
+        return ResponseEntity.ok(reportService.buildExpenseCategoryReport(p, my[0], my[1]));
     }
 
     @GetMapping("/three-month-trend")
     public ResponseEntity<ThreeMonthTrendResponse> trend(@AuthenticationPrincipal CurrentUserPrincipal p) {
         return ResponseEntity.ok(reportService.threeMonthTrend(p));
     }
+
+    @Operation(
+            description = "Ay veya yıl girilmezse, otomatik şu ankileri alır"
+    )
+    @GetMapping("/budget")
+    public ResponseEntity<List<BudgetResponse>> budgetReport(
+            @AuthenticationPrincipal CurrentUserPrincipal p,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
+    ) {
+        int[] my=resolveMonthYear(month, year);
+        return ResponseEntity.ok(reportService.budgetReport(my[0], my[1], p));
+    }
+
+    //default olarak şu ankileri çekiyor
+    private int[] resolveMonthYear(Integer month, Integer year) {
+        LocalDate now = LocalDate.now();
+
+        if (month == null) month = now.getMonthValue();
+        if (year == null) year = now.getYear();
+
+        return new int[]{month, year};
+    }
+
+
+
 }
 
 

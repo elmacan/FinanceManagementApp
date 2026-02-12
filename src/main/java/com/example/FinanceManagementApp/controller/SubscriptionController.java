@@ -5,6 +5,7 @@ import com.example.FinanceManagementApp.dto.request.SubscriptionUpdateRequest;
 import com.example.FinanceManagementApp.dto.response.SubscriptionResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
 import com.example.FinanceManagementApp.service.SubscriptionServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,9 @@ public class SubscriptionController {
 
     private final SubscriptionServiceImpl subscriptionService;
 
-
+    @Operation(
+            description = "Billing day , 1–28 ile sınırlı şu anlık "
+    )
     @PostMapping
     public ResponseEntity<SubscriptionResponse >create(
             @AuthenticationPrincipal CurrentUserPrincipal principal,

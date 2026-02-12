@@ -1,5 +1,6 @@
 package com.example.FinanceManagementApp.service;
 
+import com.example.FinanceManagementApp.dto.response.BudgetResponse;
 import com.example.FinanceManagementApp.dto.response.report.ExpenseCategoryResponse;
 import com.example.FinanceManagementApp.dto.response.report.MonthlySummaryResponse;
 import com.example.FinanceManagementApp.dto.response.report.ThreeMonthTrendResponse;
@@ -22,6 +23,7 @@ import java.util.*;
 public class ReportService {
     private final TransactionRepo transactionRepo;
     private final MonthlyIncomeGeneratorService incomeGenerator;
+    private final BudgetService budgetService;
 
 
 
@@ -252,5 +254,7 @@ public class ReportService {
     }
 
 
-
+    public List<BudgetResponse> budgetReport(Integer month, Integer year, CurrentUserPrincipal p) {
+        return budgetService.list(month, year, p);
+    }
 }

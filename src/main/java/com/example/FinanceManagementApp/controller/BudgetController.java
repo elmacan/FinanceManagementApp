@@ -25,7 +25,7 @@ public class BudgetController {
 
 
     @Operation(
-            description = "category_id = null -> Total Budget , =! ise Category Budget "
+            description = "category_id = null ise Total Budget , =! ise Category Budget "
     )
     @PostMapping
     public ResponseEntity<BudgetResponse> create(
