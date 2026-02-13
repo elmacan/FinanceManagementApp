@@ -29,4 +29,18 @@ public interface PlannedExpenseRepo extends JpaRepository<PlannedExpense, Long> 
 """)
     BigDecimal sumPlannedForBudget(Users user, Category category, Integer month, Integer year);
 
+
+    @Query("""
+SELECT p FROM PlannedExpense p
+WHERE p.user.id = :userId
+AND MONTH(p.plannedDate)=:month
+AND YEAR(p.plannedDate)=:year
+""")
+    List<PlannedExpense> findForReport(
+            Long userId,
+            int month,
+            int year
+    );
+
+
 }

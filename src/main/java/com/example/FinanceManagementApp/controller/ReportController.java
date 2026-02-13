@@ -3,7 +3,7 @@ package com.example.FinanceManagementApp.controller;
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
 import com.example.FinanceManagementApp.dto.response.report.*;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.ReportService;
+import com.example.FinanceManagementApp.service.impl.ReportServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReportController {
 
-    private final ReportService reportService;
+    private final ReportServiceImpl reportService;
 
 
     @GetMapping("/monthly-summary")
@@ -105,6 +105,19 @@ public class ReportController {
             @AuthenticationPrincipal CurrentUserPrincipal p
     ) {
         return ResponseEntity.ok(reportService.allSavingGoalsReport(p));
+    }
+
+    @Operation(summary = "Aylık Planlı Harcamalar için Özet ve Analiz",
+            description = "Ay veya yıl girilmezse, otomatik şu ankileri alır")
+    @GetMapping("/planned-expenses")
+    public ResponseEntity<PlannedExpenseReportResponse> plannedReport(
+            @AuthenticationPrincipal CurrentUserPrincipal p,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year
+    ) {
+
+        int[] my=resolveMonthYear(month, year);
+        return ResponseEntity.ok(reportService.buildPlannedReport(p, my[0], my[1]));
     }
 
 
