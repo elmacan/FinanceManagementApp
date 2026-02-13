@@ -4,7 +4,7 @@ import com.example.FinanceManagementApp.dto.request.SubscriptionRequest;
 import com.example.FinanceManagementApp.dto.request.SubscriptionUpdateRequest;
 import com.example.FinanceManagementApp.dto.response.SubscriptionResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.SubscriptionServiceImpl;
+import com.example.FinanceManagementApp.service.impl.SubscriptionServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

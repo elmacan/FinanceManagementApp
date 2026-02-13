@@ -1,4 +1,4 @@
-package com.example.FinanceManagementApp.service;
+package com.example.FinanceManagementApp.service.impl;
 
 import com.example.FinanceManagementApp.dto.request.CategoryRequest;
 import com.example.FinanceManagementApp.dto.response.CategoryResponse;
@@ -8,6 +8,7 @@ import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.CategoryRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
+import com.example.FinanceManagementApp.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 

@@ -5,7 +5,7 @@ import com.example.FinanceManagementApp.dto.request.BudgetLimitRequest;
 import com.example.FinanceManagementApp.dto.request.BudgetRequest;
 import com.example.FinanceManagementApp.dto.response.BudgetResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.BudgetServiceImpl;
+import com.example.FinanceManagementApp.service.impl.BudgetServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

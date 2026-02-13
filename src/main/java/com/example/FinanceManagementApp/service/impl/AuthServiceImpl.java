@@ -1,4 +1,4 @@
-package com.example.FinanceManagementApp.service;
+package com.example.FinanceManagementApp.service.impl;
 
 import com.example.FinanceManagementApp.dto.request.LoginRequest;
 import com.example.FinanceManagementApp.dto.request.RefreshTokenRequest;
@@ -10,6 +10,7 @@ import com.example.FinanceManagementApp.model.entity.Users;
 import com.example.FinanceManagementApp.repository.RefreshTokenRepo;
 import com.example.FinanceManagementApp.repository.UsersRepo;
 import com.example.FinanceManagementApp.security.JwtService;
+import com.example.FinanceManagementApp.service.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,11 +33,11 @@ public class AuthServiceImpl implements AuthService {
 
         private final JwtService jwtService;
 
-        private final RefreshTokenService refreshTokenService;
+        private final RefreshTokenServiceImpl refreshTokenService;
         private final RefreshTokenRepo refreshTokenRepo;
 
         private final SubscriptionServiceImpl subscriptionService;
-        private final MonthlyIncomeGeneratorService monthlyIncomeGeneratorService;
+        private final MonthlyIncomeGeneratorServiceImpl monthlyIncomeGeneratorService;
 
 
 

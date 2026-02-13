@@ -1,4 +1,4 @@
-package com.example.FinanceManagementApp.service;
+package com.example.FinanceManagementApp.service.impl;
 
 import com.example.FinanceManagementApp.dto.request.SubscriptionRequest;
 import com.example.FinanceManagementApp.dto.request.SubscriptionUpdateRequest;
@@ -11,6 +11,7 @@ import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.CategoryRepo;
 import com.example.FinanceManagementApp.repository.SubscriptionRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
+import com.example.FinanceManagementApp.service.SubscriptionService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

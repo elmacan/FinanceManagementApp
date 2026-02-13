@@ -3,7 +3,7 @@ package com.example.FinanceManagementApp.controller;
 import com.example.FinanceManagementApp.dto.request.UpdateUserRequest;
 import com.example.FinanceManagementApp.dto.response.UserResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.UsersServiceImpl;
+import com.example.FinanceManagementApp.service.impl.UsersServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

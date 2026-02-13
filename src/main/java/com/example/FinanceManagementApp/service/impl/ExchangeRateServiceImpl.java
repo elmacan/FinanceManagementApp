@@ -1,0 +1,136 @@
+package com.example.FinanceManagementApp.service.impl;
+
+import com.example.FinanceManagementApp.currency.TcmbClient;
+import com.example.FinanceManagementApp.model.entity.ExchangeRate;
+import com.example.FinanceManagementApp.model.enums.CurrencyType;
+import com.example.FinanceManagementApp.repository.ExchangeRateRepo;
+import com.example.FinanceManagementApp.service.ExchangeRateService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.EnumMap;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class ExchangeRateServiceImpl implements ExchangeRateService {
+
+    private final TcmbClient tcmbClient;
+    private final ExchangeRateRepo repo;
+    private static final LocalTime TCMB_UPDATE_TIME = LocalTime.of(15, 30);
+    //sitede kur bu saatte güncelleniyor her gün
+
+
+    @Override
+    public Map<CurrencyType, BigDecimal> getTodayRates() {
+
+        LocalDate today = LocalDate.now();
+
+        Map<CurrencyType, BigDecimal> map = new EnumMap<>(CurrencyType.class);
+
+        map.put(CurrencyType.TRY, BigDecimal.ONE);
+
+        boolean missing = false;
+
+        for (CurrencyType c : CurrencyType.values()) {
+
+            if (c == CurrencyType.TRY )
+                continue;
+
+            var r = repo.findByCurrencyAndRateDate(c,today);
+
+            if (r.isPresent()) {
+                map.put(c, r.get().getTryRate());
+            } else {
+                missing = true;
+            }
+        }
+
+        if (!missing && !shouldRefreshTodayRates(today)) {
+            return map;
+        }
+
+
+        try{
+            fetchFromTcmb(today,map);
+            return map;
+        }
+        catch(Exception e){
+            System.out.println("TCMB fetch failed → using last known rates");
+            return loadLatestFromDbOrFallback();
+        }
+
+
+
+    }
+
+    private void fetchFromTcmb(
+            LocalDate today,
+            Map<CurrencyType,BigDecimal> map) {
+
+        var resp = tcmbClient.getRates();
+
+        resp.getCurrencies().forEach(c -> {
+
+            if (c.getForexBuying()==null) return;
+
+            try {
+                CurrencyType type =
+                        CurrencyType.valueOf(c.getCode());
+
+                ExchangeRate e = repo.findByCurrencyAndRateDate(type,today).orElse(new ExchangeRate());
+
+                e.setCurrency(type);
+                e.setTryRate(c.getForexBuying());
+                e.setRateDate(today);
+                e.setSource("TCMB");
+
+                repo.save(e);
+                map.put(type,c.getForexBuying());
+
+            } catch(Exception ignored){}
+        });
+    }
+
+    private Map<CurrencyType, BigDecimal> loadLatestFromDbOrFallback() {
+
+        Map<CurrencyType, BigDecimal> map = new EnumMap<>(CurrencyType.class);
+
+        map.put(CurrencyType.TRY, BigDecimal.ONE);
+
+        for (CurrencyType c : CurrencyType.values()) {
+
+            if (c == CurrencyType.TRY) continue;
+
+            var latest = repo.findTopByCurrencyOrderByRateDateDesc(c);
+
+            if (latest.isPresent()) {
+                map.put(c, latest.get().getTryRate());
+            } else {
+                map.put(c, staticFallback(c));
+            }
+        }
+
+        return map;
+    }
+
+    private BigDecimal staticFallback(CurrencyType c) {
+        System.out.println("staticFallback for " + c);
+        return switch (c) {
+            case USD -> new BigDecimal("43");
+            case EUR -> new BigDecimal("51");
+            default -> BigDecimal.ONE;
+        };
+    }
+
+
+    private boolean shouldRefreshTodayRates(LocalDate today) {
+        return LocalTime.now().isAfter(TCMB_UPDATE_TIME);
+    }
+
+
+
+}

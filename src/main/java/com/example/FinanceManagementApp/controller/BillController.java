@@ -6,7 +6,7 @@ import com.example.FinanceManagementApp.dto.response.BillPayResponse;
 import com.example.FinanceManagementApp.dto.response.BillResponse;
 import com.example.FinanceManagementApp.model.enums.BillStatus;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.BillServiceImpl;
+import com.example.FinanceManagementApp.service.impl.BillServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -4,7 +4,7 @@ import com.example.FinanceManagementApp.dto.request.CategoryRequest;
 import com.example.FinanceManagementApp.dto.response.CategoryResponse;
 import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.CategoryServiceImpl;
+import com.example.FinanceManagementApp.service.impl.CategoryServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

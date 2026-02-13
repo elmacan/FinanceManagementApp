@@ -6,7 +6,7 @@ import com.example.FinanceManagementApp.dto.request.SavingGoalUpdateRequest;
 import com.example.FinanceManagementApp.dto.response.SavingEntryResponse;
 import com.example.FinanceManagementApp.dto.response.SavingGoalResponse;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.SavingGoalServiceImpl;
+import com.example.FinanceManagementApp.service.impl.SavingGoalServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

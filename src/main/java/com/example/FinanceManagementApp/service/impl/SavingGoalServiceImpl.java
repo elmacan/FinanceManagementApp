@@ -1,4 +1,4 @@
-package com.example.FinanceManagementApp.service;
+package com.example.FinanceManagementApp.service.impl;
 //impl yapılcak
 
 import com.example.FinanceManagementApp.currency.CurrencyService;
@@ -14,6 +14,7 @@ import com.example.FinanceManagementApp.model.enums.CurrencyType;
 import com.example.FinanceManagementApp.repository.SavingEntryRepo;
 import com.example.FinanceManagementApp.repository.SavingGoalRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
+import com.example.FinanceManagementApp.service.SavingGoalService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

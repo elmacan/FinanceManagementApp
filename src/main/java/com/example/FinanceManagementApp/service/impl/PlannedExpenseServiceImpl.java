@@ -1,4 +1,4 @@
-package com.example.FinanceManagementApp.service;
+package com.example.FinanceManagementApp.service.impl;
 
 import com.example.FinanceManagementApp.currency.CurrencyService;
 import com.example.FinanceManagementApp.dto.request.PlannedExpenseRequest;
@@ -13,6 +13,7 @@ import com.example.FinanceManagementApp.model.enums.TransactionType;
 import com.example.FinanceManagementApp.repository.CategoryRepo;
 import com.example.FinanceManagementApp.repository.PlannedExpenseRepo;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
+import com.example.FinanceManagementApp.service.PlannedExpenseService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

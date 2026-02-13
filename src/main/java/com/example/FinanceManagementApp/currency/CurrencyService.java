@@ -1,7 +1,7 @@
 package com.example.FinanceManagementApp.currency;
 
 import com.example.FinanceManagementApp.exception.ApiException;
-import com.example.FinanceManagementApp.service.ExchangeRateService;
+import com.example.FinanceManagementApp.service.impl.ExchangeRateServiceImpl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Service
 public class CurrencyService {
-    private final ExchangeRateService rateService;
+    private final ExchangeRateServiceImpl rateService;
     private Map<CurrencyType, BigDecimal> rates;
 
 

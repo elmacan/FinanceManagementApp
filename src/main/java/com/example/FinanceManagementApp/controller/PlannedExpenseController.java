@@ -6,7 +6,7 @@ import com.example.FinanceManagementApp.dto.response.PlannedExpenseResponse;
 import com.example.FinanceManagementApp.dto.response.TransactionResponse;
 import com.example.FinanceManagementApp.model.entity.PlannedExpense;
 import com.example.FinanceManagementApp.security.CurrentUserPrincipal;
-import com.example.FinanceManagementApp.service.PlannedExpenseServiceImpl;
+import com.example.FinanceManagementApp.service.impl.PlannedExpenseServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
