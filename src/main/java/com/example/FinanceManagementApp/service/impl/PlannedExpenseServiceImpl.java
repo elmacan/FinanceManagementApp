@@ -1,6 +1,5 @@
 package com.example.FinanceManagementApp.service.impl;
 
-import com.example.FinanceManagementApp.currency.CurrencyService;
 import com.example.FinanceManagementApp.dto.request.PlannedExpenseRequest;
 import com.example.FinanceManagementApp.dto.response.PlannedExpenseResponse;
 import com.example.FinanceManagementApp.dto.response.TransactionResponse;
@@ -29,7 +28,7 @@ public class PlannedExpenseServiceImpl implements PlannedExpenseService {
     private final PlannedExpenseRepo plannedExpenseRepo;
     private final CategoryRepo categoryRepo;
     private final TransactionServiceImpl transactionService;
-    private final CurrencyService currencyService;
+    private final CurrencyServiceImpl currencyService;
 
 
     @Transactional

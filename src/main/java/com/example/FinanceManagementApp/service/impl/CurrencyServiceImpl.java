@@ -1,7 +1,7 @@
-package com.example.FinanceManagementApp.currency;
+package com.example.FinanceManagementApp.service.impl;
 
+import com.example.FinanceManagementApp.service.CurrencyService;
 import com.example.FinanceManagementApp.exception.ApiException;
-import com.example.FinanceManagementApp.service.impl.ExchangeRateServiceImpl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,12 +15,13 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
-public class CurrencyService {
+public class CurrencyServiceImpl implements CurrencyService {
     private final ExchangeRateServiceImpl rateService;
     private Map<CurrencyType, BigDecimal> rates;
 
 
     @PostConstruct
+    @Override
     public void init() {
         rates = rateService.getTodayRates();
     }
@@ -30,6 +31,7 @@ public class CurrencyService {
 
 
 
+    @Override
     public BigDecimal getRate(CurrencyType from, CurrencyType to) {
 
         validate(from, to);
@@ -47,6 +49,7 @@ public class CurrencyService {
         return fromTry.divide(toTry, 6, RoundingMode.HALF_UP);   //rate
     }
 
+    @Override
     public BigDecimal convert(BigDecimal amount, CurrencyType from, CurrencyType to) {
 
         if (amount == null) {

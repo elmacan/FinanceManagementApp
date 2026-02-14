@@ -1,7 +1,6 @@
 package com.example.FinanceManagementApp.service.impl;
 //impl yapılcak
 
-import com.example.FinanceManagementApp.currency.CurrencyService;
 import com.example.FinanceManagementApp.dto.request.SavingEntryRequest;
 import com.example.FinanceManagementApp.dto.request.SavingGoalRequest;
 import com.example.FinanceManagementApp.dto.request.SavingGoalUpdateRequest;
@@ -31,7 +30,7 @@ public class SavingGoalServiceImpl implements SavingGoalService {
 
     private final SavingGoalRepo savingGoalRepo;
     private final SavingEntryRepo entryRepo;
-    private final CurrencyService currencyService;
+    private final CurrencyServiceImpl currencyService;
 
     @Transactional
     @Override

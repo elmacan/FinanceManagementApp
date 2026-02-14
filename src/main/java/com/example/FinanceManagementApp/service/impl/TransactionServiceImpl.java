@@ -1,6 +1,5 @@
 package com.example.FinanceManagementApp.service.impl;
 
-import com.example.FinanceManagementApp.currency.CurrencyService;
 import com.example.FinanceManagementApp.dto.request.BaseTransactionRequest;
 import com.example.FinanceManagementApp.dto.request.ExpenseRequest;
 import com.example.FinanceManagementApp.dto.request.IncomeRequest;
@@ -35,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final CategoryRepo categoryRepo;
 
-    private final CurrencyService currencyService;
+    private final CurrencyServiceImpl currencyService;
 
     private final BudgetService budgetService;
 
